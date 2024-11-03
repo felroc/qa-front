@@ -1,13 +1,17 @@
 import {NavLink} from "react-router-dom";
 
 const NavBar = ()=>{
+    const handlerSubmit = (e)=>{
+        e.preventDefault();
+        alert('Buscando Gestión....');
+    }
     return(
         <nav className="navbar navbar-expand-lg bg-body-tertiaryX bg-primary" data-bs-theme="darkx" >
         <div className="container-fluid">
             
-            <NavLink className="navbar-brand" to="/">
+            <h4 className="navbar-brand" to="/">
                 Software QA
-            </NavLink>
+            </h4>
 
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -21,14 +25,17 @@ const NavBar = ()=>{
                         </NavLink>
                     </li>
                     <li className="nav-item">
-                        <NavLink className="nav-link" to="/gestion">Gestiones</NavLink>
+                        <NavLink className="nav-link" to="/gestion">Proyecto</NavLink>
                     </li>
                     <li className="nav-item">
                         <NavLink className="nav-link" to="/etapa">Etapas</NavLink>
-                    </li>            
+                    </li>
+                    <li className="nav-item">
+                        <NavLink className="nav-link" to="/revision">Revisión</NavLink> 
+                    </li>
                 </ul>
 
-                <form className="d-flex" role="search" >
+                <form className="d-flex" role="search" onSubmit={handlerSubmit}>
                     <input className="form-control me-2" type="search" placeholder="Gestion ID" aria-label="Search"/>
                     <button className="btn btn-info btn-outline-successx btn-darkx " type="submit">Buscar</button>
                 </form>

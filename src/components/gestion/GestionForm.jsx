@@ -67,24 +67,31 @@ const GestionForm = ()=>{
     }
 
     const createNewGestion=()=>{
-        
+        const msgnoproy="Debe ingresar el nombre del proyecto";
+        const msgnopo="Debe seleccionar el Product Owner";
+        const msgnodate="Debe ingresar la fecha de creación";
+
         // Validaciones        
         if( proyName.length == 0){            
-            console.log("Debe ingresar el nombre del proyecto");
+            console.log(msgnoproy);
+            alert(msgnoproy);
             return;
         }
         else if( user.length == 0){            
-            console.log("Debe seleccionar el Producto Owner");
+            console.log(msgnopo);
+            alert(msgnopo);
             return;
         }
         else if( created.length == 0){            
-            console.log("Debe ingresar la fecha de creación");
+            console.log(msgnodate);
+            alert(msgnodate);
             return;
         }
-
-        addNewProyecto();
-        addNewEtapa()        
-    };
+        else {
+            addNewProyecto();
+            addNewEtapa();
+        }
+    }
 
     
     // Eventos OnChange
@@ -146,6 +153,6 @@ const GestionForm = ()=>{
             </div>            
         </form>
     )
-};
+}
 
 export default GestionForm;
