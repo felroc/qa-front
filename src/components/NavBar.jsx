@@ -33,6 +33,9 @@ const NavBar = ()=>{
                     <li className="nav-item">
                         <NavLink className="nav-link" to="/revision">Revisión</NavLink> 
                     </li>
+                    <li className="nav-item">
+                        <NavLink className="nav-link" to="/users">Usuarios</NavLink> 
+                    </li>
                 </ul>
 
                 <form className="d-flex" role="search" onSubmit={handlerSubmit}>

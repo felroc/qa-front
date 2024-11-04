@@ -10,9 +10,10 @@ import './index.css';
 import App from './App'; //import reportWebVitals from './reportWebVitals';
 import NavBar from './components/NavBar';
 import Welcome from './components/Welcome';
-import TaskTable from './task/TaskTable';
+import TaskTable from './components/task/TaskTable';
 import GestionForm from './components/gestion/GestionForm';
 import GestionList from './components/gestion/GestionList';
+import UserList from './components/user/userList';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -21,11 +22,12 @@ root.render(
       <NavBar></NavBar>
       <div className='container my-3'>
         <Routes>
-          <Route path='/' element={<GestionList/>}></Route>
-          <Route path='/dashboard' element={<h1>Dashboard</h1>}></Route>
+          <Route path='/' element={<App></App>}></Route>
+          <Route path='/dashboard' element={<GestionList/>}></Route>
           <Route path='/gestion' element={<GestionForm></GestionForm>}></Route>
           <Route path='/etapa' element={<h1>Etapas</h1>}></Route>
           <Route path='/revision' element={<h1>Revisión</h1>}></Route>
+          <Route path='/users' element={<UserList></UserList>}></Route>
           <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
         </Routes>        
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import TaskRow from "./TaskRow";
-import TaskForm from "./TaskForm";
+import TaskRow from "./GestionRow";
+//import TaskForm from "./TaskForm";
 
 const initialState=[
     {id:1, name:"Aprender React", prioridad:3, completado:true},
@@ -9,9 +9,9 @@ const initialState=[
     {id:4, name:"Testing Reack", prioridad:1, completado:false},
 ];
 
-const TaskTable = () => {
+const GestionList = () => {
 
-    const headers = ["#", "Task", "Prioridad", "Completado"];
+    const headers = ["Proyecto Id", "Nombre proyecto", "Producto Owner", "Estado", "Fecha creación"];
     const [tasks,setTasks] = useState([]);
 
     useEffect( ()=> {
@@ -32,9 +32,9 @@ const TaskTable = () => {
     const headerStyle = {textAlign:"center", fontWeight:"bold"};
     return(
         <div>
-            <h1>Task Table</h1>
+            <h1>Proyectos</h1>
             <hr></hr>
-            <TaskForm addNewTask={addNewTask}></TaskForm>
+            {/* <TaskForm addNewTask={addNewTask}></TaskForm> */}
             <div className="row">
                 <div className="col-md-4"></div>
                 <div className="col-md-8"></div>
@@ -76,4 +76,4 @@ const TaskTable = () => {
 //
 //*******************************************************************/
 
-export default TaskTable;
+export default GestionList;

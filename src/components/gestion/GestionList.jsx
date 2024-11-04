@@ -1,40 +1,27 @@
+//import { getSuggestedQuery } from "@testing-library/react";
 import { useState, useEffect } from "react";
-import TaskRow from "./GestionRow";
-//import TaskForm from "./TaskForm";
+import GestionForm from "./GestionForm";
 
-const initialState=[
-    {id:1, name:"Aprender React", prioridad:3, completado:true},
-    {id:2, name:"Probar React", prioridad:1, completado:false},
-    {id:3, name:"Mockup HTML", prioridad:1, completado:false},
-    {id:4, name:"Testing Reack", prioridad:1, completado:false},
-];
+const ProyList = () =>{
+    const [proys, setProys] = useState([]);
 
-const GestionList = () => {
-
-    const headers = ["#", "Task", "Prioridad", "Completado"];
-    const [tasks,setTasks] = useState([]);
-
-    useEffect( ()=> {
-        //console.log("Iniciando...");
-        setTasks(initialState);
-    },[]);
-    
-    const toggleTask = ( id )=>{
-        //console.log( id );
-        //console.log( "*** Click! ");
-        setTasks( tasks.map( (task) => (task.id===id ? {...task,completado:!task.completado} : task)));
-    }    
-    
-    const addNewTask = (newTaskName) =>{
-        setTasks([...tasks,{id:tasks.length+1,name:newTaskName,prioridad:1, completado:false}]); 
+    const getProys = async () =>{
+        const response = await fetch("http://localhost:8081/api/qa/proys");
+        //console.log(response);
+        const data = await response.json();
+        console.log(data);
+        setProys(data);
     }
 
-    const headerStyle = {textAlign:"center", fontWeight:"bold"};
-    return(
+    useEffect(()=>{
+        getProys(); 
+    },[])
+
+    return (
         <div>
-            <h1>Proyectos</h1>
-            <hr></hr>
-            {/* <TaskForm addNewTask={addNewTask}></TaskForm> */}
+            <h1>Gestión de proyectos</h1>
+            <hr></hr>        
+            <GestionForm></GestionForm>
             <div className="row">
                 <div className="col-md-4"></div>
                 <div className="col-md-8"></div>
@@ -42,38 +29,33 @@ const GestionList = () => {
                     <table className="table">
                         <thead>
                             <tr>                                                  
-                                {/* <th>#</th>
-                                <th>Task</th>
-                                <th>Prioridad</th>
-                                <th>Completado</th> */}
-                                <th>Index</th>
-                                {headers.map((header, index)=>(
+                                <th>Proyecto Id</th>
+                                <th>Nombre proyecto</th>
+                                <th>Producto Owner</th>
+                                <th>Estado</th>
+                                <th>Fecha Creación</th>
+                                {/* {headers.map((header, index)=>(
                                     <th style={headerStyle} key={index}>{header}</th>
-                                ))}
+                                ))} */}
                             </tr>
                         </thead>
                         <tbody>
-                            {tasks.map((task, index)=>(
-                                <TaskRow key={task.id} index={index} task={task} toggleTask={toggleTask}></TaskRow>
-                                // <tr key={index}>
-                                //     <td>{task.id}</td>
-                                //     <td>{task.name}</td>
-                                //     <td>{task.priordad}</td>
-                                //     <td>{task.completado}</td>
-                                // </tr>
+                            {proys.map((proy, index)=>(                            
+                                <tr key={index}>
+                                    <td>{proy.Proyecto_Id}</td>
+                                    <td>{proy.Nombre}</td>
+                                    <td>{proy.User_Create}</td>
+                                    <td>{proy.Estado}</td>
+                                    <td>{proy.Create}</td>
+                                </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    );
+    )
+    
 }
 
-//*******************************************************************/
-//
-// Componente funcional (componente basado en funciones)
-//
-//*******************************************************************/
-
-export default GestionList;
+export default ProyList
