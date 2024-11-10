@@ -6,7 +6,7 @@ const NavBar = ()=>{
         alert('Buscando Gestión....');
     }
     return(
-        <nav className="navbar navbar-expand-lg bg-body-tertiaryX bg-primary" data-bs-theme="darkx" >
+        <nav className="navbar navbar-expand-lg bg-body-tertiaryX bg-primary" data-bs-theme="dark" >
         <div className="container-fluid">
             
             <h4 className="navbar-brand" to="/">

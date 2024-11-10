@@ -12,6 +12,7 @@ const initialState=[
 const TaskTable = () => {
 
     const headers = ["#", "Task", "Prioridad", "Completado"];
+    
     const [tasks,setTasks] = useState([]);
 
     useEffect( ()=> {

@@ -1,18 +1,20 @@
 //import { getSuggestedQuery } from "@testing-library/react";
 import { useState, useEffect } from "react";
 import GestionForm from "./GestionForm";
+import moment from 'moment'; 
 
 const ProyList = () =>{
     const [proys, setProys] = useState([]);
 
     const getProys = async () =>{
-        const response = await fetch("http://localhost:8081/api/qa/proys");
+        const response = await fetch("http://localhost:8081/api/qa/proyectos");
         //console.log(response);
         const data = await response.json();
-        console.log(data);
+        //console.log(data);
         setProys(data);
     }
 
+    // Evento Load
     useEffect(()=>{
         getProys(); 
     },[])
@@ -21,7 +23,9 @@ const ProyList = () =>{
         <div>
             <h1>Gestión de proyectos</h1>
             <hr></hr>        
-            <GestionForm></GestionForm>
+            
+            {/* <GestionForm></GestionForm> */}
+
             <div className="row">
                 <div className="col-md-4"></div>
                 <div className="col-md-8"></div>
@@ -46,7 +50,7 @@ const ProyList = () =>{
                                     <td>{proy.Nombre}</td>
                                     <td>{proy.User_Create}</td>
                                     <td>{proy.Estado}</td>
-                                    <td>{proy.Create}</td>
+                                    <td>{moment(proy.Created).format('DD MMMM YYYY')}</td>
                                 </tr>
                             ))}
                         </tbody>

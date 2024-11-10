@@ -18,7 +18,7 @@ import UserList from './components/user/userList';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
-    <React.StrictMode>
+    {/* <React.StrictMode > */}
       <NavBar></NavBar>
       <div className='container my-3'>
         <Routes>
@@ -31,7 +31,7 @@ root.render(
           <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
         </Routes>        
       </div>
-    </React.StrictMode>
+    {/* </React.StrictMode> */}
   </BrowserRouter>
 );
 
