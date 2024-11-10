@@ -1,4 +1,11 @@
 import { useState, useEffect } from "react";
+import axios from 'axios';
+
+const backend = "http://localhost:8081";
+
+const msgnoproy="Debe ingresar el nombre del proyecto";
+const msgnopo="Debe seleccionar el Product Owner";
+const msgnodate="Debe ingresar la fecha de creación";
 
 // Formulario para ingreso de proyectos
 const GestionForm = ()=> {
@@ -31,10 +38,10 @@ const GestionForm = ()=> {
     const [etapa, setEtapa] = useState('Solicitado'); // Debe existir en la DB
     const [etapaId, setEtapaId] = useState(1); // Binding a la DB
     const [dev, setDev] = useState('');
-    const [manualTecico, setManualTec] = useState("");
-    const [manualDeploy, setManualDeploy] = useState("");
+    const [manualTecnico, setManualTecnico] = useState(''); 
+    const [manualDeploy, setManualDeploy] = useState(''); 
     const [tester, setTester] = useState('');
-    const [cronograma, setCronograma] = useState("");
+    const [cronograma, setCronograma] = useState(''); 
     const [acceso, setAcceso] = useState("");
     const [permiso, setPermiso] = useState("");
     const [db, setDb] = useState("");
@@ -42,6 +49,11 @@ const GestionForm = ()=> {
     const [fechaInicio, setFechaInico] = useState("");
     const [fechaFinal, setFechaFinal] = useState("");
     
+    // Archivos adjuntos
+    const [fileManTec, setFileManTec] = useState(null); 
+    const [fileManDep, setFileManDep] = useState(null); 
+    const [fileCrono, setFileCrono] = useState(null); 
+
     // Listas desplegables
     const [catalogos, setCatalogos] = useState([]);
     const [servers, setServers] = useState([]);
@@ -54,7 +66,7 @@ const GestionForm = ()=> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const getUsuarios = async () =>{        
-        const response = await fetch("http://localhost:8081/api/qa/users");
+        const response = await fetch(backend+"/api/qa/users");
         //console.log(response);
         const data = await response.json();
         //console.log(data);
@@ -68,7 +80,7 @@ const GestionForm = ()=> {
     }
 
     const getEstados = async () =>{        
-        const response = await fetch("http://localhost:8081/api/qa/estados");
+        const response = await fetch(backend+"/api/qa/estados");
         //console.log(response);
         const data = await response.json();
         //console.log(data);
@@ -78,7 +90,7 @@ const GestionForm = ()=> {
     }
 
     const getCatalogos = async () =>{        
-        const response = await fetch("http://localhost:8081/api/qa/catalogos");
+        const response = await fetch(backend+"/api/qa/catalogos");
         //console.log(response);
         const data = await response.json();
         console.log(data);
@@ -99,20 +111,19 @@ const GestionForm = ()=> {
 
 
     // Funcion para agregar un nuevo proyecto a las gestiones
-    const addNewProyecto = () =>{                
+    const addNewProyecto = async () =>{                
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Front y Back )
         const datos = {             
             proyName,
             user,
             created,
-            estado // estado inicial
+            estado 
         };
 
         //alert('estado '+estado);
+        //setProys([...proys, datos]);
 
-        setProys([...proys, datos]);
-
-        fetch('http://localhost:8081/api/qa/proyecto', {
+        await fetch(backend+'/api/qa/proyecto', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -126,64 +137,45 @@ const GestionForm = ()=> {
             if( data.affectedRows===1 ) 
                 alert('El proyecto fue guardado.'); 
             else 
-                alert("ERROR en el MySQL."); // ampliar error
+                alert("ERROR en el MySQL."+data.info); 
         })
         .catch(error => {
             console.error('Error al enviar los datos:', error);
             // Mostrar mensaje de error al usuario
         });
-    };
+    };    
     
-    // Funcion para agregar una nueva etapa a un proyecto 
-    const addNewEtapa = (newTaskName) =>{
-        //setTasks([...tasks,{id:tasks.length+1,name:newTaskName,prioridad:1, completado:false}]); 
-        const etapaId = etapas.length + 1;
-        const datos = { 
-            proyectoId: proyectoId,
-            etapaId: etapaId,
-            dev: dev,
-            qaTester: qa,
-            manualTecnico: manualTec,
-            manualDespliegue: manualDeploy,
-            cronograma: cronogramaQA,
-            ambiente: ambiente,
-            acceso: accesos,
-            permisos: permisos,
-            instanciaDB: instanciaDB,
-            serverName: serverName,
-            fechaInicio: fechaInicio,
-            fechaFinal: fechaFinal
-       };
-        setEtapa([...etapas, datos]);
+    const createNewGestion=()=>{    
+        addNewProyecto();
+        addNewEtapa();    
     }
 
-    const createNewGestion=()=>{
-        const msgnoproy="Debe ingresar el nombre del proyecto";
-        const msgnopo="Debe seleccionar el Product Owner";
-        const msgnodate="Debe ingresar la fecha de creación";
-
-        // Validaciones        
-        if( proyName.length === 0){            
-            console.log(msgnoproy);
-            alert(msgnoproy);
-            return;
-        }
-        else if( user.length === 0){            
-            console.log(msgnopo);
-            alert(msgnopo);
-            return;
-        }
-        else if( created.length === 0){            
-            console.log(msgnodate);
-            alert(msgnodate);
+    const attach = async (filename, field) => {
+        if( filename === null || filename === undefined ) {
+            alert('Seleccione un archivo...' );
             return;
         }
         else {
-            addNewProyecto();
-            addNewEtapa();
+            const formData = new FormData();
+            formData.append('file', filename); // adjunta el archivo
+
+            await axios.post(backend+'/api/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(response => {
+                console.log('Attach:', response.data);                
+                field = response.data; // asigna el campo recibido como parametro
+                //return response.data;
+            })
+            .catch(error => {
+                console.error('Error al subir el archivo:', error);
+                alert('Error al subir el archivo:', error);
+            });            
         }
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTOS
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,10 +197,19 @@ const GestionForm = ()=> {
     const onChangeDev = (event) => {
         setDev(event.target.value);        
     };
-
+    const onChangeManualTecnico = (event)=>{
+        setFileManTec(event.target.files[0]);        
+    }
+    const onChangeManualDeploy = (event)=>{
+        setFileManDep(event.target.files[0]);        
+    }
+    
     const onChangeTester = (event) => {
         setTester(event.target.value);        
     };
+    const onChangeCronograma = (event)=>{
+        setFileCrono(event.target.files[0]);        
+    }
     const onChangeServer = (event) => {
         setServer(event.target.value);      
     };
@@ -223,9 +224,61 @@ const GestionForm = ()=> {
     };
 
     // Evento OnSubmit del Form
-    const handlerSubmit = (e)=>{
+    const handlerSubmit =  (e)=>{
         e.preventDefault(); // evitar submit para enviar datos al backend
+                
+        // Validaciones        
+        if( proyName.length === 0){            
+            console.log(msgnoproy);
+            alert(msgnoproy);
+            return;
+        }
+        else if( user.length === 0){            
+            console.log(msgnopo);
+            alert(msgnopo);
+            return;
+        }
+        else if( created.length === 0){            
+            console.log(msgnodate);
+            alert(msgnodate);
+            return;
+        }
+        else {            
+            //console.log(fileManTec);    
+            attach( fileManTec, manualTecnico )
+            //console.log("man tec: " +manualTecnico );
+            if( manualTecnico === null ) return;
+            
+            attach( fileManDep, manualDeploy ) 
+            if( manualDeploy === null ) return; 
+
+            attach( fileCrono, cronograma ) 
+            if( cronograma === null ) return;
+
+            createNewGestion();
+        }        
     } 
+    
+    // Funcion para agregar una nueva etapa a un proyecto 
+    const addNewEtapa = (newTaskName) =>{       
+        const datos = {             
+            etapaId, // default 1
+            dev,
+            tester,
+            manualTecnico,
+            manualDeploy,
+            cronograma,
+            ambiente: etapa,
+            acceso: acceso,
+            permisos: permiso,
+            instanciaDB: db,
+            serverName: server,
+            fechaInicio: fechaInicio,
+            fechaFinal: fechaFinal
+        };
+        //setEtapa([...etapas, datos]);
+        
+    }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // COMPONENTE HTML
@@ -289,12 +342,12 @@ const GestionForm = ()=> {
 
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Manual Técnico</label>
-                    <input type="file" name="manualTecnico" className="form-control"></input>
+                    <input type="file" name="manualTecnico" onChange={onChangeManualTecnico} className="form-control" id="manualTec"/>
                 </div>
                 
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Manual de Despliegue</label>
-                    <input type="file" name="manualDespliegue" className="form-control" />
+                    <input type="file" name="manualDespliegue" onChange={onChangeManualDeploy} className="form-control" />
                 </div>
 
             </div>
@@ -394,7 +447,8 @@ const GestionForm = ()=> {
 
             <div className="row mt-3">
                 <div className="col-md-12">
-                    <button type="submit" onClick={createNewGestion} className="btn btn-primary" >Guardar</button> 
+                {/* onClick={createNewGestion} */}
+                    <button type="submit" className="btn btn-primary" >Guardar</button> 
                 </div>
             </div>
         
