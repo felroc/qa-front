@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import "./GestionForm.css";
-
-const backend = "http://localhost:8081"; // URL del backend
 
 const MSG_NO_PROYNAME="Ingrese el nombre del proyecto";
 const MSG_NO_PO="Seleccione el Product Owner";
@@ -23,8 +21,9 @@ const MSG_NO_FECHA_FIN="Seleccione la Fecha de Cierre"; // al finalizar la etapa
 const MSG_NO_FILE="Seleccione un archivo";
 
 // Formulario para ingreso de proyectos
-const GestionForm = ()=> {
-    
+const GestionForm = ({fronted,backend})=> {
+    const navigate = useNavigate();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // BINDINGS
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +61,7 @@ const GestionForm = ()=> {
     const [server, setServer] = useState("");
     const [fechaInicio, setFechaInico] = useState("");
     const [fechaFinal, setFechaFinal] = useState("");
+    const [revision,setRevision] = useState('1');
     
     // Archivos adjuntos
     const [fileManTec, setFileManTec] = useState(null); 
@@ -212,6 +212,7 @@ const GestionForm = ()=> {
                 console.log('Etapa: API Success'); 
                 //console.log(data);
                 alert("Proyecto guardado correctamente.");
+                navigate('/revision'); // <------------------------------------------------------
                 return "OK";
             } else {
                 console.error("Etapa: MySQL Error");
@@ -439,10 +440,21 @@ const GestionForm = ()=> {
                     <label htmlFor="" className="form-label">Fecha de creación</label>
                     <input type="date" value={created} onChange={onChangeCreated} onClick={onChangeCreated} name="created" className="form-control"/>
                 </div>                
-                
+            </div>
+
+            <hr></hr>
+
+            <div className="row form-group">
                 <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Etapa</label>
-                    <input type="text" name="etapa" className="form-control" value={etapa} readOnly={true} />
+                    <p>{etapa}</p>
+                    {/* <input type="text" name="etapa" className="form-control" value={etapa} readOnly={true} /> */}
+                </div>
+
+                <div className="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label htmlFor="revision" className="control-label">Revisión</label>
+                    <p>{revision}</p>
+                    {/* <input type="text" name="revision" value={revision} readOnly={true} className="form-control right" /> */}
                 </div>
 
             </div>
@@ -537,20 +549,7 @@ const GestionForm = ()=> {
                 </div>
             </div>
 
-            <div className="row form-group">                
-            
-                <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                    <label htmlFor="estado" className="control-label">Revisión</label>
-                    <select id="estado" className="form-control">
-                        <option value=""></option>
-                        <option>Pruebas de Negocio</option>
-                        <option>Pruebas de Desarrollo</option>
-                        <option>Pruebas de QA</option>
-                        <option>Pruebas de Integración</option>
-                        <option>Pruebas de OWASP</option>
-                    </select>
-                </div>
-
+            <div className="row form-group">            
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Fecha Inicio</label>
                     <input type="date" name="fechaInicio" onChange={onChangeFechaIni} onClick={onChangeFechaIni} className="form-control" />
@@ -561,13 +560,14 @@ const GestionForm = ()=> {
                     <input type="date" name="fechaFinal" onChange={onChangeFechaFin} onClick={onChangeFechaFin} className="form-control" />
                 </div>
             </div>
-
+            
+            <hr></hr>
 
             <div className="row mt-3">
                 <div className="col-md-12 contenedor">                
                     <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
-                    <span style={{width:50 +'px'}}></span>
-                    <button type="button" className="btn btn-success" style={{width:150 +'px'}}>Revisión</button> 
+                    {/* <span style={{width:50 +'px'}}></span>
+                    <button type="button" className="btn btn-success" style={{width:150 +'px'}}>Revisión</button>  */}
                 </div>
             </div>
         

@@ -9,12 +9,14 @@ import './index.css';
 // Componentes
 import App from './App'; //import reportWebVitals from './reportWebVitals';
 import NavBar from './components/NavBar';
-import Welcome from './components/Welcome';
-import TaskTable from './components/task/TaskTable';
 import GestionForm from './components/gestion/GestionForm';
 import GestionList from './components/gestion/GestionList';
 import UserList from './components/user/userList';
 import Revision from './components/revision/Revision';
+import LoginForm from './components/LoginForm/LoginForm';
+
+const frontend = "localhost:3000"; // URL del fronted
+const backend = "http://localhost:8081"; // URL del backend
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -23,12 +25,12 @@ root.render(
       <NavBar></NavBar>
       <div className='container my-3'>
         <Routes>
-          <Route path='/' element={<App></App>}></Route>
-          <Route path='/dashboard' element={<GestionList/>}></Route>
-          <Route path='/gestion' element={<GestionForm></GestionForm>}></Route>
-          <Route path='/etapa' element={<h1>Etapas</h1>}></Route>
-          <Route path='/revision' element={<Revision></Revision>}></Route>
-          <Route path='/users' element={<UserList></UserList>}></Route>
+          <Route path='/' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
+          <Route path='/dashboard' element={<h1>Dashboard</h1>} ></Route>          
+          <Route path='/proyecto' element={<GestionForm frontend={frontend} backend={backend}/>}></Route>
+          <Route path='/gestion' element={<GestionList frontend={frontend} backend={backend}/>}></Route>
+          <Route path='/revision' element={<Revision backend={backend}/>}></Route>
+          <Route path='/users' element={<UserList frontend={frontend} backend={backend}/>}></Route>
           <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
         </Routes>        
       </div>

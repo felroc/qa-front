@@ -1,6 +1,6 @@
 //import { getSuggestedQuery } from "@testing-library/react";
 import { useState, useEffect } from "react";
-import GestionForm from "./GestionForm";
+import "./GestionRow.css";
 import moment from 'moment'; 
 
 const ProyList = () =>{
@@ -24,8 +24,6 @@ const ProyList = () =>{
             <h1>Gestión de proyectos</h1>
             <hr></hr>        
             
-            {/* <GestionForm></GestionForm> */}
-
             <div className="row">
                 <div className="col-md-4"></div>
                 <div className="col-md-8"></div>
@@ -50,7 +48,9 @@ const ProyList = () =>{
                                     <td>{proy.Nombre}</td>
                                     <td>{proy.User_Create}</td>
                                     <td>{proy.Estado}</td>
-                                    <td>{moment(proy.Created).format('DD MMMM YYYY')}</td>
+                                    <td>{moment(proy.Created).format('DD MMMM YYYY')}</td>                                    
+                                    <td><button>Revision</button></td>
+                                    <td><button>Delete</button></td>
                                 </tr>
                             ))}
                         </tbody>

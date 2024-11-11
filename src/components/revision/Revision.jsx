@@ -1,96 +1,102 @@
+import { useEffect, useState } from "react";
+import "./Revision.css"
 
-const Revision = () =>{
+const Revision = ({frontend,backend}) => { 
+
+    const [checkList, setCheckList] = useState([]);
+
+    const getCheckList = async () => {
+        const response = await fetch("http://localhost:8081/api/qa/checkList");
+        //console.log(response);
+        const data = await response.json();
+        //console.log(data);
+        setCheckList(data);
+    }
+
+    // Evento Page Load
+    useEffect( () => {
+        getCheckList(); 
+    },[])
+
+    const handlerSubmit = (e) =>{
+        e.preventDefault(); // evitar recargar la página web (postback)
+        alert('Buscando proyecto...');
+    }
 
     return (
         
-	<div class="container" method="post" action="home.php">
+	<div class="container" >
 
         <h1 class="label-form form-group ">
-            <center>
-
-                <a href="#">Revisión del Proceso QA</a>
-            </center>
+            <centerx>
+                <h1>Revisión del Desarrollo</h1>
+            </centerx>
         </h1>
 
-        <div name="revisor" class="row form-group">
+        <hr></hr>
+        <div class="row form-group">
+            <form className="d-flex" role="search" onSubmit={handlerSubmit}>
+                <input className="form-control me-2" type="search" placeholder="Gestion ID" aria-label="Search"/>
+                <button className="btn btn-info btn-outline-successx btn-darkx " type="submit">Buscar</button>
+            </form>
+        </div>
 
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 col-lg-offset-6 col-md-offset-6 col-sm-offset-6 col-xs-offset-6">
-                <label class="control-label">Analista Revisor</label>
+        <hr></hr>
+
+        <div class="row form-group">
+
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <label class="control-label">Nombre de Proyecto</label>
+                <input type="text" name="revisor" class="form-control" readonly="readonly" value="Sistema de Ventas" />
             </div>
 
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                <input type="text" name="revisor" class="form-control" readonly="readonly" />
+                <label class="control-label">Etapa</label>
+                <input type="text" name="revisor" class="form-control" readonly="readonly" value="Desarrollo-QA" />
             </div>
 
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <label class="control-label">QA Tester</label>
+                <input type="text" name="revisor" class="form-control" readonly="readonly" value="April Smith" />
+            </div>
+
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <label class="control-label">Estado</label>
-            </div>
-
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
-                <input type="text" name="estado" class="form-control" value='10' readonly="readonly" />
+                <input type="text" name="estado" class="form-control" value='En proceso' readonly="readonly" />
             </div>
         </div>
 
+        <hr></hr>
    
+        <div className="contenedorx">        
+            <table border="1" cellpadding="10" cellspacing="0" className="table-responsive">
+                <thead>
+                    <tr>
+                        <th>Pruebas</th>
+                        <th style={{width:170+'px'}}>Satisfactorio</th>
+                        <th>Fecha de Validación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        {checkList.map((item, index)=>(
+                            <tr>
+                                <td key={index}>{item.Item}</td>
+                                <td><input type="checkbox" className="form-check-input"/></td>
+                                <td><input type="date" className="form-control" /></td>
+                            </tr>  
+                        ))}
+                </tbody>
+            </table>
+            
+        </div>    
 
-        <div class="panel-group">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <a class="sub-seccion" data-toggle="collapse" data-target="#sub5">Revisión del Checklist de Pruebas</a>
-                </div>        
-
-                <div className="contenedor">
-                {/* border="1" cellpadding="10" cellspacing="0" style="width: 100%; max-width: 1200px; text-align: center;" */}
-                    <table >
-                    <thead>
-                        <tr>
-                        <th>Checklist</th>
-                        <th>Revisión</th>
-                        <th>Fecha</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                        <td>Pruebas de Negocio</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                        <tr>
-                        <td>Pruebas del Desarrollo</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                        <tr>
-                        <td>Set de Pruebas de QA</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                        <tr>
-                        <td>Pruebas de Integración</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                        <tr>
-                        <td>Pruebas Standard Internacional</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                        <tr>
-                        <td>Pruebas de Certificación</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                        <tr>
-                        <td>Pruebas de Liberación a Producción</td>
-                        <td><input type="checkbox"/></td>
-                        <td><input type="date"/></td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>                  
+        <div className="row mt-3">
+                <div className="col-md-12 contenedor">                
+                    <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
+                    {/* <span style={{width:50 +'px'}}></span>
+                    <button type="button" className="btn btn-success" style={{width:150 +'px'}}>Revisión</button>  */}
+                </div>
             </div>
-        </div>
-
     </div>
 
     )
