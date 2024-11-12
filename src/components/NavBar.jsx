@@ -13,7 +13,8 @@ const NavBar = ()=>{
                 Software QA
             </h4>
 
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" >
+            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarSupportedContent" >
                 {/* 
                 aria-controls="navbarSupportedContent" 
                 aria-expanded="false" 
@@ -39,6 +40,9 @@ const NavBar = ()=>{
                     </li>
                     <li className="nav-item">
                         <NavLink className="nav-link" to="/users">Usuarios</NavLink> 
+                    </li>
+                    <li className="nav-item">
+                        <NavLink className="nav-link" to="/task">Task</NavLink> 
                     </li>
                 </ul>
 

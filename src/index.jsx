@@ -11,9 +11,10 @@ import App from './App'; //import reportWebVitals from './reportWebVitals';
 import NavBar from './components/NavBar';
 import GestionForm from './components/gestion/GestionForm';
 import GestionList from './components/gestion/GestionList';
-import UserList from './components/user/userList';
 import Revision from './components/revision/Revision';
 import LoginForm from './components/LoginForm/LoginForm';
+import UserList from './components/user/UserList';
+import TaskTable from './components/task/TaskTable';
 
 const frontend = "localhost:3000"; // URL del fronted
 const backend = "http://localhost:8081"; // URL del backend
@@ -30,7 +31,8 @@ root.render(
           <Route path='/proyecto' element={<GestionForm frontend={frontend} backend={backend}/>}></Route>
           <Route path='/gestion' element={<GestionList frontend={frontend} backend={backend}/>}></Route>
           <Route path='/revision' element={<Revision backend={backend}/>}></Route>
-          <Route path='/users' element={<UserList frontend={frontend} backend={backend}/>}></Route>
+          <Route path='/users' element={<UserList frontend={frontend} backend={backend}></UserList>}></Route>
+          <Route path='/task' element={<TaskTable></TaskTable>}></Route>
           <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
         </Routes>        
       </div>

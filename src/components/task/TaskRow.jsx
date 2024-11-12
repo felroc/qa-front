@@ -16,7 +16,9 @@ const TaskRow = ( {index,task, toggleTask}) => {
             <td>{prioridades[task.prioridad]}</td>
             <td>
                 <input type="checkbox" checked={task.completado} onChange={()=>toggleTask(task.id)} ></input>
-                {task.completado}</td>
+                <span> {task.completado}</span>
+                <span> {task.completado===true?"OK":"ERR"}</span>
+            </td>
         </tr>
     )
 }
