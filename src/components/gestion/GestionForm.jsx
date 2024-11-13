@@ -356,7 +356,7 @@ const GestionForm = ({fronted,backend})=> {
 
     // Eventos OnChange
     const onChangeProyName = (e)=>{        
-        setProyName(e.target.value);        
+        setProyName(e.target.value);
     }
     const onChangeCreated = (e)=>{
         setCreated(e.target.value);        
