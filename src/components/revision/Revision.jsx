@@ -3,7 +3,18 @@ import "./Revision.css"
 
 const Revision = ({frontend,backend}) => { 
 
-    const [checkList, setCheckList] = useState([]);
+    const [checkList, setCheckList] = useState([]);    
+    const [proyId, setProyId] = useState([]);
+    const [proyecto, setProyecto] = useState([]);
+    
+
+    // Evento Page Load
+    useEffect( () => {
+        var proy_id = 0;
+        getCheckList(); 
+        //await getProyecto(proy_id);
+    },[])
+
 
     const getCheckList = async () => {
         const response = await fetch("http://localhost:8081/api/qa/checkList");
@@ -13,63 +24,87 @@ const Revision = ({frontend,backend}) => {
         setCheckList(data);
     }
 
-    // Evento Page Load
-    useEffect( () => {
-        getCheckList(); 
-    },[])
-
-    const handlerSubmit = (e) =>{
-        e.preventDefault(); // evitar recargar la página web (postback)
-        alert('Buscando proyecto...');
+    const getRevision = async (proyId,etapaId) => {
+        const response = await fetch("http://localhost:8081/api/qa/revision/"+proyId+"/"+etapaId);
+        //console.log(response);
+        const data = await response.json();
+        //console.log(data);
+        setCheckList(data);
+    }
+    const getEtapa = async (proyId,etapaId) => {
+        const response = await fetch("http://localhost:8081/api/qa/etapa/"+proyId+"/"+etapaId);
+        //console.log(response);
+        const data = await response.json();
+        //console.log(data);
+        setCheckList(data);
+    }
+    const getProyecto = async (proyId) => {
+        const response = await fetch("http://localhost:8081/api/qa/proyecto/"+proyId);
+        //console.log(response);
+        const data = await response.json();
+        //console.log('data',data);
+        await setProyecto(data[0]);
+        //console.log('proy',proyecto.Proyecto_Id);
+        return data[0].Proyecto_Id;
     }
 
-    return (
-        
-	<div class="container" >
+    const onChangeProyId = async (e) => { 
+        await setProyId(e.target.value) 
+    }
 
-        <h1 class="label-form form-group ">
-            <centerx>
-                <h1>Revisión del Desarrollo</h1>
-            </centerx>
-        </h1>
+    const onClickBuscar = async(proyId) => {
+        console.log('proyId: ',proyId);
+        await getProyecto(proyId);
+    }
+    const onSearch = (e) => {
+        e.preventDefault(); // evitar recargar la página web (postback)
+    }
+    
+    return (
+	<div className="container" >
+        <div className="label-form form-group ">
+            {/* <center> */}{/* </center> */}    
+        </div>
+        
+        <h1>Revisión del Desarrollo</h1>
 
         <hr></hr>
-        <div class="row form-group">
-            <form className="d-flex" role="search" onSubmit={handlerSubmit}>
-                <input className="form-control me-2" type="search" placeholder="Gestion ID" aria-label="Search"/>
-                <button className="btn btn-info btn-outline-successx btn-darkx " type="submit">Buscar</button>
+        <div className="row form-group">
+            <form className="d-flex" role="search" onSubmit={onSearch}>
+                <input type="search" value={proyId} onChange={onChangeProyId} placeholder="Gestion ID" className="form-control me-2" aria-label="Search"/>
+                <button type="submit" onClick={()=>{onClickBuscar(proyId)}} className="btn btn-info btn-outline-success btn-darkx ">Buscar</button>
             </form>
         </div>
 
         <hr></hr>
 
-        <div class="row form-group">
+        <div className="row form-group">
 
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                <label class="control-label">Nombre de Proyecto</label>
-                <input type="text" name="revisor" class="form-control" readonly="readonly" value="Sistema de Ventas" />
+            <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
+                <label className="control-label">Nombre de Proyecto</label>
+                <input type="text" name="revisor" className="form-control" readOnly="readonly" value="Sistema de Ventas" />
             </div>
 
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                <label class="control-label">Etapa</label>
-                <input type="text" name="revisor" class="form-control" readonly="readonly" value="Desarrollo-QA" />
+            <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
+                <label className="control-label">Etapa</label>
+                <input type="text" name="revisor" className="form-control" readOnly="readonly" value="Desarrollo-QA" />
             </div>
 
-            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-                <label class="control-label">QA Tester</label>
-                <input type="text" name="revisor" class="form-control" readonly="readonly" value="April Smith" />
+            <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
+                <label className="control-label">QA Tester</label>
+                <input type="text" name="revisor" className="form-control" readOnly="readonly" value="April Smith" />
             </div>
 
-            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <label class="control-label">Estado</label>
-                <input type="text" name="estado" class="form-control" value='En proceso' readonly="readonly" />
+            <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <label className="control-label">Estado</label>
+                <input type="text" name="estado" className="form-control" value='En proceso' readOnly="readonly" />
             </div>
         </div>
 
         <hr></hr>
    
         <div className="contenedorx">        
-            <table border="1" cellpadding="10" cellspacing="0" className="table-responsive">
+            <table border="1" cellPadding="10" cellSpacing="0" className="table-responsive">
                 <thead>
                     <tr>
                         <th>Pruebas</th>
@@ -79,7 +114,7 @@ const Revision = ({frontend,backend}) => {
                 </thead>
                 <tbody>
                         {checkList.map((item, index)=>(
-                            <tr>
+                            <tr key={index}>
                                 <td key={index}>{item.Item}</td>
                                 <td><input type="checkbox" className="form-check-input"/></td>
                                 <td><input type="date" className="form-control" /></td>
