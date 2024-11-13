@@ -1,0 +1,55 @@
+import PieChart from "./PieChart";
+import BarChart from "./BarChart";
+import LineChart from "./LineChart";
+import { useState, useEffect, useRef } from "react";
+
+const Dashboard = ({frontend,backend}) => {
+    
+    const [tbl, setTbl] = useState([])
+    const [datos, setDatos] = useState([]);
+    const labels = ['Solicitado','En Revisión', 'En Corrección', 'Aprobado', 'Rechazado', 'Descartados']
+
+    const getDashboard = async () => {
+        const response = await fetch(backend+"/api/qa/dashboard");
+        const data = await response.json();
+        console.log('dashboard: ',data);
+        
+        setTbl(data);      
+        
+        const lst = data.map((dato)=>dato.cantidad)
+        setDatos(lst)
+        console.log('lst: ',lst);
+        return [lst];
+    }
+  
+    //console.log('datos: ',datos)
+
+    // Evento Page Load
+    useEffect( () => {
+        getDashboard();
+    },[])
+
+    return (
+        <div>
+            <h1>Gestion de Proyectos</h1>
+            <hr></hr>
+            <div className="row"> 
+
+                <div className="col-md-2">
+                    <PieChart labels={labels} datos={datos}></PieChart>    
+                </div>
+
+                <div className="col-md-4">
+                    <BarChart labels={labels} datos={datos}></BarChart>
+                </div>
+               
+                <div className="col-md-5">
+                    <LineChart labels={labels} datos={datos}></LineChart>
+                </div>
+
+            </div>
+        </div>
+    )
+}
+
+export default Dashboard;

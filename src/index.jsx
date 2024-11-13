@@ -16,6 +16,7 @@ import LoginForm from './components/LoginForm/LoginForm';
 import UserList from './components/user/UserList';
 import TaskTable from './components/task/TaskTable';
 import UserForm from './components/user/UserForm';
+import Dashboard from './components/dashboard/dashboard';
 
 const frontend = "localhost:3000"; // URL del fronted
 const backend = "http://localhost:8081"; // URL del backend
@@ -28,7 +29,7 @@ root.render(
       <div className='container my-3'>
         <Routes>
           <Route path='/' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
-          <Route path='/dashboard' element={<h1>Dashboard</h1>} ></Route>          
+          <Route path='/dashboard' element={<Dashboard frontend={frontend} backend={backend}></Dashboard>}></Route>          
           <Route path='/proyecto' element={<GestionForm frontend={frontend} backend={backend}/>}></Route>
           <Route path='/gestion' element={<GestionList frontend={frontend} backend={backend}/>}></Route>
           <Route path='/revision' element={<Revision backend={backend}/>}></Route>

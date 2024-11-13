@@ -37,7 +37,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
     // OnFocus
     const inputName = useRef(null);
 
-    const getRoles = async () =>{        
+    const getRoles = async () => {
         const response = await fetch(backend+"/api/qa/roles");
         //console.log(response);
         const data = await response.json();
