@@ -4,7 +4,7 @@ import "./TaskRow.css";
 //const TaskRow = ( props) => {
 //    console.log(props);
 
-const TaskRow = ( {index,task, toggleTask}) => {        
+const TaskRow = ( {index, task, toggleTask}) => {        
     //console.log(task);
     const prioridades = ["Ninguna", "Baja","Meida","Alta"];
 

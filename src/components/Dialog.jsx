@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function AlertDialog() {
+export default function AlertDialog(caption,msg) {
     
     const [open, setOpen] = React.useState(false);
 
@@ -20,18 +20,18 @@ export default function AlertDialog() {
 
   return (
     <div>
-      <Button onClick={handleClickOpen}>Abrir diálogo</Button>
+      <Button onClick={handleClickOpen}>Abrir Dialogo</Button>
       <Dialog
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description">
 
-        <DialogTitle id="alert-dialog-title">{"¿Estás seguro?"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{caption}</DialogTitle>
 
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Esta acción no se puede deshacer.
+            {msg}
           </DialogContentText>
         </DialogContent>
 

@@ -15,6 +15,7 @@ import Revision from './components/revision/Revision';
 import LoginForm from './components/LoginForm/LoginForm';
 import UserList from './components/user/UserList';
 import TaskTable from './components/task/TaskTable';
+import UserForm from './components/user/UserForm';
 
 const frontend = "localhost:3000"; // URL del fronted
 const backend = "http://localhost:8081"; // URL del backend
@@ -32,6 +33,8 @@ root.render(
           <Route path='/gestion' element={<GestionList frontend={frontend} backend={backend}/>}></Route>
           <Route path='/revision' element={<Revision backend={backend}/>}></Route>
           <Route path='/users' element={<UserList frontend={frontend} backend={backend}></UserList>}></Route>
+          <Route path='/users/view/:username' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
+          <Route path='/users/edit/:username' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
           <Route path='/task' element={<TaskTable></TaskTable>}></Route>
           <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
         </Routes>        
