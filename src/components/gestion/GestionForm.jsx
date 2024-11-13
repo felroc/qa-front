@@ -1,6 +1,7 @@
 import { useState, useEffect, useSyncExternalStore } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import "./GestionForm.css";
 
 const MSG_NO_PROYNAME="Ingrese el nombre del proyecto";
@@ -22,6 +23,7 @@ const MSG_NO_FILE="Seleccione un archivo";
 
 // Formulario para ingreso de proyectos
 const GestionForm = ({fronted,backend})=> {
+    const { proy_id } = useParams();
     const navigate = useNavigate();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,14 +111,18 @@ const GestionForm = ({fronted,backend})=> {
         const data = await response.json();
         console.log(data);
         await setCatalogos(data); // Se solicita el catalogo 1 unica vez y se filtra
-        await setServers(data.filter(cat => cat.tipo === 'serv'));
-        await setDbs(data.filter(cat => cat.tipo === 'db'));
-        await setAccesos(data.filter(cat => cat.tipo === 'acc'));
+        await setServers(data.filter(cat => cat.tipo === 'serv'));        
+        await setDbs(data.filter(cat => cat.tipo === 'db'));        
+        await setAccesos(data.filter(cat => cat.tipo === 'acc'));        
         await setPermisos(data.filter(cat => cat.tipo === 'per'));
+        setServer(servers[0]);
+        setServer(dbs[0]);
+        setServer(accesos[0]);
+        setServer(permisos[0]);
     }
 
     // Evento Page Load 
-    useEffect( ()=> {
+    useEffect( ()=> {        
         console.log("Cargando gestion form...");
         getEstados();
         getUsuarios();
@@ -161,7 +167,7 @@ const GestionForm = ({fronted,backend})=> {
                 return data; // > 0 : "OK";
             }
             else {
-                console.log("Proyecto: MySQL Error");
+                console.error("Proyecto: MySQL Error");
                 //console.log(data);
                 return data.info;
             }
@@ -212,7 +218,7 @@ const GestionForm = ({fronted,backend})=> {
                 console.log('Etapa: API Success'); 
                 //console.log(data);
                 alert("Proyecto guardado correctamente.");
-                navigate('/revision'); // <------------------------------------------------------
+                navigate('/revision'); 
                 return "OK";
             } else {
                 console.error("Etapa: MySQL Error");
@@ -407,6 +413,7 @@ const GestionForm = ({fronted,backend})=> {
     // VISTA HTML
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
+        <div>
         <form onSubmit={handlerSubmit} className="mb-3">        
             <h1>Gestión y Control de Calidad</h1>
             <hr></hr>
@@ -441,7 +448,7 @@ const GestionForm = ({fronted,backend})=> {
                     <input type="date" value={created} onChange={onChangeCreated} onClick={onChangeCreated} name="created" className="form-control"/>
                 </div>                
             </div>
-
+            
             <hr></hr>
 
             <div className="row form-group">
@@ -566,12 +573,13 @@ const GestionForm = ({fronted,backend})=> {
             <div className="row mt-3">
                 <div className="col-md-12 contenedor">                
                     <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
-                    {/* <span style={{width:50 +'px'}}></span>
-                    <button type="button" className="btn btn-success" style={{width:150 +'px'}}>Revisión</button>  */}
+                    <span style={{width:50+"px"}}></span>
+                <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>
                 </div>
             </div>
-        
+            
         </form>
+        </div>
     )
 }
 
