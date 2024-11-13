@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
-import UserForm from "./UserForm";
+import UserForm from "./UserList";
 
 const UserList = ({frontend,backend}) =>{
     
@@ -23,18 +23,24 @@ const UserList = ({frontend,backend}) =>{
     }
  
     const [users, setUsers] = useState([]);
+    const [roles, setRoles] = useState([]);
 
-    const getUsers = async () =>{
+    const getAllUsers = async () =>{
         console.log(backend);
         const response = await fetch(backend+"/api/qa/users");
         //console.log(response);
         const data = await response.json();
         //console.log(data);
-        setUsers(data);
+        
+        await setUsers(data);
+
+        
     }
 
-    useEffect(()=>{
-        getUsers();
+    useEffect(async()=>{
+        await getRoles();
+        getAllUsers();
+        
     },[])
 
     const onView = (username)=>{
@@ -98,7 +104,7 @@ const UserList = ({frontend,backend}) =>{
             return error;
         }); 
     }
-
+    
     const addNewUser = (datos) =>{
 
         setUsers([...users,{
@@ -108,23 +114,33 @@ const UserList = ({frontend,backend}) =>{
         }]);        
     } 
 
-    const headers = ["Usuario", "Nombre Completo","Correo Electrónico", "Fecha de Creación", "Estado"];
+    const getRoles = async () =>{        
+        const response = await fetch(backend+"/api/qa/roles");
+        //console.log(response);
+        const data = await response.json();
+        console.log(data);        
+        await setRoles(data);        
+    }
+
+    const headers = ["Usuario", "Nombre Completo","Correo Electrónico","Rol", "Fecha de Creación", "Estado"];
     const headerStyle = {textAlign:"center", fontWeight:"bold"};
     return (
     <div>                
         {/* <UserForm frontend={frontend} backend={backend} addNewUser={addNewUser}></UserForm>
         <hr></hr> */}
-
+        
         <h1>Listado de Usuarios</h1>
         <hr></hr>
-
+        <button className="btn btn-success" onClick={()=>{navigate('/users/new')}}>Crear Usuario</button>
+        <br></br>
         <div className="table-responsive">
-            <table className="table">
+            <table border={1} className="table table-striped table-bordered table-hover table-dark">
                 <thead>
                     <tr>
                         {headers.map((header, index)=>(
                             <th style={headerStyle} key={index}>{header}</th>
                         ))}
+                        <th colSpan={3}></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,7 +150,7 @@ const UserList = ({frontend,backend}) =>{
                             <td>{user.Username}</td>                            
                             <td>{user.Fullname}</td>
                             <td>{user.Email}</td>
-                            <td>{user.Rol_Id}</td>
+                            <td>{roles[user.Rol_Id-1].Rolname}</td>
                             <td>{moment(user.Created).format('DD MMMM YYYY')}</td>
                             <td><button onClick={()=>{onView(user.Username)}} className="btn btn-info1 btn-dark">Consultar</button></td>
                             <td><button onClick={()=>{onEdit(user.Username)}} className="btn btn-warning1 btn-dark">Editar</button></td>
@@ -148,4 +164,4 @@ const UserList = ({frontend,backend}) =>{
     )    
 }
 
-export default UserList
+export default UserList;

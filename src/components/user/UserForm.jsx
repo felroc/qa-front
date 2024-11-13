@@ -16,8 +16,8 @@ const UserForm = ({frontend,backend,addNewUser}) => {
     const navigate = useNavigate();
     const MySwal = withReactContent(Swal);
 
-    const Notificacion = (msg, icono) => {
-        Swal.fire({
+    const Notificacion = async (msg, icono) => {
+        await Swal.fire({
             position: "top-end",
             icon: icono,
             title: msg,
@@ -41,7 +41,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
         const response = await fetch(backend+"/api/qa/roles");
         //console.log(response);
         const data = await response.json();
-        //console.log(data);
+        console.log(data);
         //setEstados(data.filter(estado => estado.Etapa_Id === null)); etapa_id is null para todas las etapas 
         setRoles(data);       
         setRol_id(data[0].Rol_Id); // se toma el primer valor del combo box
@@ -101,13 +101,14 @@ const UserForm = ({frontend,backend,addNewUser}) => {
 
     const createNewUser = async(valid)=>{
         if( valid ) {
+            alert(rol_id)
             const datos = {            
                 userName,
                 fullName,
                 email,
                 pwd,
                 estado: 'Activo',
-                rol_id: 1,
+                rol_id: rol_id,
             }
             
             await fetch(backend+'/api/qa/user', {
@@ -124,8 +125,9 @@ const UserForm = ({frontend,backend,addNewUser}) => {
                 if( data.msg === userName ) {
                     console.info('Proyecto: API Success'); 
                     //console.log(data);
-                    addNewUser(datos);
-                    Notificacion("El usuario se guardó correctamente!","success")
+                    if( addNewUser!=undefined) addNewUser(datos);
+                    Notificacion("El usuario se guardó correctamente!","success");
+                    navigate('/users');
                     return "OK";
                 }
                 else {
@@ -157,24 +159,28 @@ const UserForm = ({frontend,backend,addNewUser}) => {
                     <label htmlFor="fullname" className="form-label">Nombre Completo</label>
                     <input readOnly={isReadOnly} type="text"value={fullName} onChange={onChangeFullName} name="fullname" className="form-control" required={true} ref={inputName} />
                 </div>
+            </div>
 
+            <div className="row"  >
                 <div className="col-md-4">
                     <label htmlFor="username" className="form-label">Usuario</label>
                     <input readOnly={isReadOnly}  type="text" value={userName} onChange={onChangeUserName} name="username" className="form-control" required={true}/>
                 </div>
+            </div>
 
+            <div className="row"  >
                 <div className="col-md-4">
                     <label htmlFor="email" className="form-label">Correo electrónico</label>
                     <input readOnly={isReadOnly}  type="text" value={email} onChange={onChangeEmail} name="email" className="form-control" required={true}/>
                 </div>
             </div>
-
+            
             <div className="row">
                 <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
-                    <label htmlFor="acceso" className="control-label">Rol</label>
-                    <select name="rol" value={rol_id} onChange={onChangeRol} onClick={onChangeRol} className="form-select" >
+                    <label htmlFor="rol" className="control-label">Rol</label>
+                    <select disabled={isReadOnly} name="rol" value={rol_id} onChange={onChangeRol} onClick={onChangeRol} className="form-select" >
                         {roles.map((item, index)=>(
-                            <option key={index} value={item.rol_id}>{item.Rolname}</option>
+                            <option key={index} value={item.Rol_Id}>{item.Rolname}</option>
                         ))}
                     </select>
                 </div>
@@ -194,7 +200,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
             
         </div>
         <div className="row mt-3">
-            <div className="col-md-12 contenedor"> 
+            <div className="col-md-4 contenedor"> 
                 <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
                 <span style={{width:50+"px"}}></span>
                 <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>

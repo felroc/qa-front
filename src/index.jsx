@@ -33,11 +33,12 @@ root.render(
           <Route path='/gestion' element={<GestionList frontend={frontend} backend={backend}/>}></Route>
           <Route path='/revision' element={<Revision backend={backend}/>}></Route>
           <Route path='/users' element={<UserList frontend={frontend} backend={backend}></UserList>}></Route>
+          <Route path='/users/new' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
           <Route path='/users/view/:username' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
           <Route path='/users/edit/:username' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
           <Route path='/task' element={<TaskTable></TaskTable>}></Route>
           <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
-        </Routes>        
+        </Routes>
       </div>
     {/* </React.StrictMode> */}
   </BrowserRouter>

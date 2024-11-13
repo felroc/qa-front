@@ -1,0 +1,9 @@
+
+.contenedor {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .right {
+    text-align: right;
+  }
