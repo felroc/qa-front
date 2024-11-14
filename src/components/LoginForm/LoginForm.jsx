@@ -40,8 +40,8 @@ const LoginForm = ({frontend}) => {
     const onSubmit = async (event) => {
         event.preventDefault();  
         
-        console.log('El valor del input es:', user);
-        console.log('El valor del input es:', pwd);
+        // console.log('El valor del input es:', user);
+        // console.log('El valor del input es:', pwd);
         // Aquí puedes enviar los datos a un servidor o realizar otras acciones
         
         // const  url = 'http://localhost:8081/api/qa/Login/'+user+'/'+pwd ;
@@ -49,13 +49,13 @@ const LoginForm = ({frontend}) => {
 
         await axios.get('http://localhost:8081/api/qa/Login/'+user+'/'+pwd)
         .then(response => {
-            console.log(response.data); // Imprime los datos de la respuesta
+            console.log(response); // Imprime los datos de la respuesta
             if( response.data == "NO RECORD!" )
                 Notificacion('Login incorrecto, verifique su contraseña... ' + user,"error"); 
             else {
-                login();
+                login(user,'fullname',1);
                 Notificacion('Login OK... ' + user,"success" ); 
-                navigate('/dashboard');
+                navigate('/');
             }
         })
         .catch(error => {

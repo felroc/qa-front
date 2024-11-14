@@ -6,68 +6,39 @@ import {NavLink, LinkContainer , Link} from "react-router-dom";
 
 
 const NavBar = () => {
-    const {isAuthenticated} = useAuth();
+    const {isAuthenticated, user} = useAuth();    
 
     return(
-    <div className="navbar navbar-expand-lg bg-body-tertiaryX bg-primary" data-bs-theme="dark" >
-        <div className="container-fluid">
-            
-            <NavLink className="navbar-brand" to="/">
-                Software QA
-            </NavLink>
-
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" 
-                data-bs-target="#navbarSupportedContent" 
-                aria-controls="navbarSupportedContent" 
-                aria-expanded="false" 
-                aria-label="Toggle navigation" >
-                <span className="navbar-toggler-icon"></span>
-            </button>
-
-            <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                    {isAuthenticated ? (
-                    <>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/dashboard">Dashboard</NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/proyecto">Proyecto</NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/gestion">Gestiones</NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/revision">Revisión</NavLink> 
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/users">Usuarios</NavLink> 
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/logout">Logout</NavLink> 
-                        </li>
-                    </>
-                    ) : (
-                    <>                        
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/login" aria-current="page">Login</NavLink>
-                        </li>
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/task">Task</NavLink> 
-                        </li>
-                    </>
-                    )}
-                </ul>
-
-                {/* <form className="d-flex" role="search" onSubmit={handlerSubmit}>
-                    <input className="form-control me-2" type="search" placeholder="Gestion ID" aria-label="Search"/>
-                    <button className="btn btn-info btn-outline-successx btn-darkx " type="submit">Buscar</button>
-                </form> */}
-
-            </div>
-
-        </div>
-    </div>
+        <Navbar bg="primary" variant="dark" expand="lg">
+        <Container>
+          <Navbar.Brand as={NavLink} to="/">
+            Software QA
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              {isAuthenticated ? (
+                <>
+                  <Nav.Link as={NavLink} to="/dashboard">Dashboard</Nav.Link>
+                  <Nav.Link as={NavLink} to="/proyecto">Proyecto</Nav.Link>
+                  <Nav.Link as={NavLink} to="/gestion">Gestiones</Nav.Link>
+                  <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
+                  <Nav.Link as={NavLink} to="/users">Usuarios</Nav.Link>
+                  <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>
+                  <Navbar.Text className="ms-auto">
+                    {user.fullname} - {user.rol_id}
+                  </Navbar.Text> 
+                </>
+              ) : (
+                <>
+                  <Nav.Link as={NavLink} to="/login">Login</Nav.Link>
+                  {/* <Nav.Link as={NavLink} to="/task">Task</Nav.Link> */}
+                </>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
     )
 }
 

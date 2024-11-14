@@ -12,7 +12,7 @@ const LogOut = () => {
     
     return (
         <>
-            <h1>Log out</h1>
+            <h1>Cierre de sesión</h1>
             <hr></hr>
             <p>
                 La sesión ha sido cerrada correctamente.
