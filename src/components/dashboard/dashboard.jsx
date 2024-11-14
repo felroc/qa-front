@@ -7,21 +7,21 @@ const Dashboard = ({frontend,backend}) => {
     
     const [tbl, setTbl] = useState([])
     const [datos, setDatos] = useState([]);
-    const labels = ['Solicitado','En Revisión', 'En Corrección', 'Aprobado', 'Rechazado', 'Descartados']
-
+    const labels = ['Solicitado','En Revisión', 'En Corrección', 'Aprobado', 'Rechazado']//, 'Descartados']
+    
     const getDashboard = async () => {
         const response = await fetch(backend+"/api/qa/dashboard");
         const data = await response.json();
         console.log('dashboard: ',data);
         
-        setTbl(data);      
+        await setTbl(data);      
         
-        const lst = data.map((dato)=>dato.cantidad)
-        setDatos(lst)
+        const lst = data.map((dato)=> dato.cantidad)
+        await setDatos(lst)
         console.log('lst: ',lst);
-        return [lst];
+        //return [lst];
     }
-  
+    
     //console.log('datos: ',datos)
 
     // Evento Page Load
@@ -35,18 +35,17 @@ const Dashboard = ({frontend,backend}) => {
             <hr></hr>
             <div className="row"> 
 
-                <div className="col-md-2">
-                    <PieChart labels={labels} datos={datos}></PieChart>    
+                <div className="col-md-4">
+                    <LineChart labels={labels} datos={datos}></LineChart>
                 </div>
 
                 <div className="col-md-4">
                     <BarChart labels={labels} datos={datos}></BarChart>
                 </div>
                
-                <div className="col-md-5">
-                    <LineChart labels={labels} datos={datos}></LineChart>
+                <div className="col-md-4">
+                    <PieChart labels={labels} datos={datos} tbl={tbl}></PieChart>    
                 </div>
-
             </div>
         </div>
     )

@@ -19,8 +19,8 @@ const  LineChart = ({labels,datos}) => {
         {
             label: 'Proyectos',
             data:  datos, // [30, 55, 15, 5],
-            borderColor: 'rgba(54, 162, 235, 0.5)', // Azul
-            borderColor: "rgba(75, 192, 192, 1)",
+            borderColor:      'rgba(54, 162, 235, 0.5)', // Azul
+            backgroundColor:  "rgba(54, 162, 235, 1)",
             borderWidth: 1,
             fill: true
         }
@@ -30,7 +30,7 @@ const  LineChart = ({labels,datos}) => {
     return (
       <div style={{marginLeft:"05px"}}>
         {/* <h2>Gráfico de Líneas</h2> */}
-        <Line data={data} style={{width:"600px",height:"200px"}} />
+        <Line data={data} style={{width:"600px",height:"300px"}} />
       </div>
     );
   }

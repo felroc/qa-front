@@ -11,11 +11,12 @@ const BarChart = ({labels,datos}) => {
         data:  datos, // [30, 55, 15, 5],
         backgroundColor: //"rgba(75, 192, 192, 0.6)",
         [          
-          'rgba(54, 162, 235, 0.5)', // Azul
-          'rgba(75, 192, 192, 0.5)', // Verde
-          'rgba(255, 99, 132, 0.5)', // Rojo
-          "rgba(255, 159, 64, 0.5)", // Naranja
-          'rgba(255, 206, 86, 0.2)'  // Amarillo
+         'rgba(54, 162, 235, 0.5)', // Azul
+        'rgba(54, 192, 54, 0.5)', // Verde
+        'rgba(255, 99, 132, 0.5)', // Rojo
+        "rgba(255, 159, 64, 0.5)", // Naranja
+        "rgba(153, 102, 255, 0.5)", // Purple
+        //"rgba(255, 206, 86, 0.5)", // Amarillo
         ],
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 0,
