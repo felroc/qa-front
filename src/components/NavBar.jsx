@@ -11,7 +11,7 @@ const NavBar = () => {
     return(
         <Navbar bg="primary" variant="dark" expand="lg">
         <Container>
-          <Navbar.Brand as={NavLink} to="/">
+          <Navbar.Brand as={NavLink} to="#">
             Software QA
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />

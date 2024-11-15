@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
@@ -24,17 +24,17 @@ const LoginForm = ({frontend}) => {
             timer: 3000
           });
     }
-
     
-    const [user, setInputValueUser] = useState('');
-    const [pwd, setInputValuePwd] = useState('');
-
+    const [user, setUser] = useState('');
+    const [pwd, setPwd] = useState('');
+    
+    
     const onChangeUser = (event) => {
-        setInputValueUser(event.target.value);
+        setUser(event.target.value);
     };
 
     const onChangePwd = (event) => {
-        setInputValuePwd(event.target.value);
+        setPwd(event.target.value);
     };
 
     const onSubmit = async (event) => {

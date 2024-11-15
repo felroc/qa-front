@@ -4,11 +4,15 @@ import { useAuth } from "../../AuthContext";
 
 const LogOut = () => {
 
-    const { logout } = useAuth();
+    const { logout, setUser } = useAuth();
     
     useEffect( () => {
         logout();        
-    })
+        setUser(null);
+        localStorage.removeItem('user');
+        const storedUser = localStorage.getItem('user');
+        console.log('storedUser: ',storedUser)
+    },[])
     
     return (
         <>
