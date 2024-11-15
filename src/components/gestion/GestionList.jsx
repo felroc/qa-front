@@ -35,7 +35,7 @@ const GestionList = () => {
 
             <div className="table-responsive">
                 <table border="1" cellPadding="10" cellSpacing="0" 
-                className="table1 table-striped table-bordered table-hover table-dark1">
+                className="table1 table-striped table-borderedx table-hover table-dark1">
                     <thead>
                         <tr>                                                  
                             <th>Proyecto Id</th>

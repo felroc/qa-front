@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   const login = (username, fullname, rol_id) => {
     setIsAuthenticated(true);
     setUser({ username, fullname, rol_id });
-    navigate("/"); // Redirige a la página protegida después de iniciar sesión
+    navigate("/"); // dashboard Redirige a la página protegida después de iniciar sesión
   };
 
   const logout = () => {    

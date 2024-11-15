@@ -22,6 +22,7 @@ import TaskTable from './components/task/TaskTable';
 import UserForm from './components/user/UserForm'; 
 import Dashboard from './components/dashboard/dashboard';
 import LogOut from './components/LoginForm/Logout';
+import CheckList from './components/CheckList/CheckList';
 
 const frontend = "localhost:3000"; // URL del fronted
 const backend = "http://localhost:8081"; // URL del backend
@@ -53,7 +54,7 @@ root.render(
             
             <Route path='/' element={<Welcome></Welcome>}></Route>
             <Route path='/login' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
-
+            
             <Route path='/dashboard' element={
                <ProtectedRoute>
                 <Dashboard frontend={frontend} backend={backend}></Dashboard>
@@ -81,6 +82,13 @@ root.render(
               // </ProtectedRoute>
               }>                
             </Route>
+
+            <Route path='/checklist' element={
+              //  <ProtectedRoute>
+                <CheckList frontend={frontend} backend={backend}></CheckList>
+              // </ProtectedRoute>
+              }>
+            </Route> 
 
             <Route path='/users' element={
               <ProtectedRoute>

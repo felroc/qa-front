@@ -1,11 +1,12 @@
-//import { getSuggestedQuery } from "@testing-library/react";
+import "./UserList.css"
+
 import { useState, useEffect } from "react";
 import moment from 'moment'; 
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-import "./UserList.css"
+
 import UserForm from "./UserForm";
 
 const UserList = ({frontend,backend}) =>{
@@ -30,7 +31,7 @@ const UserList = ({frontend,backend}) =>{
         const response = await fetch(backend+"/api/qa/users");
         //console.log(response);
         const data = await response.json();
-        //console.log(data);
+        //console.log('getAllUsers',data);
         
         await setUsers(data);
 
@@ -118,7 +119,7 @@ const UserList = ({frontend,backend}) =>{
         const response = await fetch(backend+"/api/qa/roles");
         //console.log(response);
         const data = await response.json();
-        console.log(data);        
+        console.log('getRoles',data);        
         await setRoles(data);        
     }
 

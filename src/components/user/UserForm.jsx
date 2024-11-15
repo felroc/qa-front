@@ -101,7 +101,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
 
     const createNewUser = async(valid)=>{
         if( valid ) {
-            alert(rol_id)
+            //alert(rol_id)
             const datos = {            
                 userName,
                 fullName,

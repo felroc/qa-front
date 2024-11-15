@@ -22,7 +22,7 @@ const NavBar = () => {
                   <Nav.Link as={NavLink} to="/dashboard">Dashboard</Nav.Link>
                   <Nav.Link as={NavLink} to="/proyecto">Proyecto</Nav.Link>
                   <Nav.Link as={NavLink} to="/gestion">Gestiones</Nav.Link>
-                  
+                  <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
                   <Nav.Link as={NavLink} to="/users">Usuarios</Nav.Link>
                   <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>
                   <Navbar.Text className="ms-auto">
@@ -31,9 +31,10 @@ const NavBar = () => {
                 </>
               ) : (
                 <>
-                <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
-                  <Nav.Link as={NavLink} to="/login">Login</Nav.Link>
-                  {/* <Nav.Link as={NavLink} to="/task">Task</Nav.Link> */}
+                    <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
+                    <Nav.Link as={NavLink} to="/checklist">CheckList</Nav.Link>
+                    <Nav.Link as={NavLink} to="/login">Login</Nav.Link>
+                    {/* <Nav.Link as={NavLink} to="/task">Task</Nav.Link> */}
                 </>
               )}
             </Nav>
