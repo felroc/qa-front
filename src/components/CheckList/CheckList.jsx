@@ -79,7 +79,7 @@ const CheckList = ({frontend,backend}) => {
             else {
                 console.error("MySQL Error");
                 //console.log(data);
-                Notificacion(data.msg,"error");
+                Notificacion("MySQL Error: "+data.msg,"error");
                 return data;
             }
         })
@@ -107,13 +107,13 @@ const CheckList = ({frontend,backend}) => {
             if( data.msg === prueba.CheckListId ) {
                 console.info('Proyecto: API Success'); 
                 //console.log(data);                
-                Notificacion("El usuario se guardó correctamente!","success");                
+                // Notificacion("El usuario se guardó correctamente!","success");                
                 return "OK";
             }
             else {
                 console.error("MySQL Error");
                 //console.log(data);
-                Notificacion(data.msg,"error");
+                Notificacion("MySQL Error: "+data.msg,"error");
                 return data;
             }
         })
@@ -145,7 +145,8 @@ const CheckList = ({frontend,backend}) => {
             setItems([...items,{
                 CheckListId : id,
                 Item        : item,
-                Activo      : activo
+                Activo      : activo,
+                TipoTestId: 1
             }])
 
             Notificacion('La Prueba se agregó correctamente.','success');
