@@ -1,0 +1,12 @@
+table {    
+  /* width: 100%;
+  max-width: 1200px; */
+  text-align: center;
+}
+  
+th, td {
+    text-align: center;
+    vertical-align: middle;
+    color: blue;
+    border: 1px solid black;
+}

@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-
-import UserForm from "./UserList";
+import "./UserList.css"
+import UserForm from "./UserForm";
 
 const UserList = ({frontend,backend}) =>{
     
@@ -134,7 +134,7 @@ const UserList = ({frontend,backend}) =>{
         <button className="btn btn-success" onClick={()=>{navigate('/users/new')}}>Crear Usuario</button>
         <br></br>
         <div className="table-responsive">
-            <table border={1} className="table table-striped table-bordered table-hover table-dark">
+            <table border="1" cellPadding="10" cellSpacing="0" className="table table-striped table-bordered table-hover table-dark1">
                 <thead>
                     <tr>
                         {headers.map((header, index)=>(

@@ -123,7 +123,7 @@ const GestionForm = ({fronted,backend})=> {
 
     // Evento Page Load 
     useEffect( ()=> {        
-        console.log("Cargando gestion form...");
+        console.log("Cargando gestion form...",proy_id);
         getEstados();
         getUsuarios();
         //setTasks([...tasks,{id:tasks.length+1,name:newTaskName,prioridad:1, completado:false}]); 
