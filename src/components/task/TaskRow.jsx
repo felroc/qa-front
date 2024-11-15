@@ -10,14 +10,14 @@ const TaskRow = ( {index, task, toggleTask}) => {
 
     return (
         <tr>
-            <td>{index}</td>
+            {/* <td>{index}</td> */}
             <td>{task.id}</td>
             <td>{task.name}</td> 
             <td>{prioridades[task.prioridad]}</td>
             <td>
                 <input type="checkbox" checked={task.completado} onChange={()=>toggleTask(task.id)} ></input>
                 <span> {task.completado}</span>
-                <span> {task.completado===true?"OK":"ERR"}</span>
+                <span> {task.completado===true?"CHECK":"UNCHECK"}</span>
             </td>
         </tr>
     )

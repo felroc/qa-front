@@ -8,10 +8,13 @@ const Revision = ({frontend,backend}) => {
     const [checkList, setCheckList] = useState([]);    
     const [proyId, setProyId] = useState([]);
     const [proyecto, setProyecto] = useState([]);
+    const [proy_etapa, setProyEtapa] = useState([]);
     const [etapa, setEtapa] = useState([]);
-    const [etapas, setEtapas] = useState([]);
+    const [etapas, setEtapas] = useState() //([{Etapa_Id: 1, Etapa: "Control de Calidad"},{Etapa_Id: 1, Etapa: "Control de Calidad"}]);
     const [revision, setRevision] = useState([]);
-    
+    const [detalleRevision, setDetalleRevision] = useState([])
+    const [checked,setIsChecked]=useState(false)
+
     const getCheckList = async () => {
         const response = await fetch("http://localhost:8081/api/qa/checkList");
         //console.log(response);
@@ -25,29 +28,30 @@ const Revision = ({frontend,backend}) => {
         const response = await fetch("http://localhost:8081/api/qa/proyecto/"+proyId);
         //console.log(response);
         const data = await response.json();
-        // console.log('data',data);        
-        setProyecto(data); // no works
+        // console.log('getProyecto',data);        
+        // setProyecto(data); // no works
         //await setProyecto(data[0]); // no works
         //console.log('getProyecto: ',proyecto); //no works        
         return data[0];
     }
 
-    // Devuelve la ultima etapa
+    // Devuelve la ultima proy_etapa
     const getProyEtapa = async (proyId) => {
         const response = await fetch("http://localhost:8081/api/qa/proy_etapa/"+proyId);
         //console.log(response);
         const data = await response.json();
         // console.log('getProyEtapa: ',data);
-        setEtapa(data);
+        // setProyEtapa(data);
         return data[0];
     }
+
     const getEtapas = async (proyId) => {
         const response = await fetch("http://localhost:8081/api/qa/etapas/");
         //console.log(response);
         const data = await response.json();
-        console.log('Etapas: ',data);
-        setEtapas(data);
-        return data[0];
+        // console.log('Etapas: ',data);
+        // await setEtapas(data); // all
+        return data; // all
     }
     
     // Devuelve la ultima revision
@@ -55,32 +59,52 @@ const Revision = ({frontend,backend}) => {
         const response = await fetch("http://localhost:8081/api/qa/revision/"+proyId+"/"+etapaId);
         //console.log(response);
         const data = await response.json();
-        console.log('getRevision: ',data);
-        setRevision(data);
+        // console.log('getRevision: ',data);
+        // await setRevision(data[0]);
         return data[0];
+    }
+    const getDeRev = async (proyId,etapaId,revId) => {
+        const response = await fetch("http://localhost:8081/api/qa/detalle_revision/"+proyId+"/"+etapaId+"/"+revId);
+        //console.log(response);
+        const data = await response.json();
+        // console.log('getRevision: ',data);
+        // await setRevision(data);
+        return data;
     }
 
     // Evento Page Load
-    useEffect( () => {
+    useEffect( () => {        
         load();
         getCheckList();
     },[])
 
     async function load() {      
-        await getEtapas()  
+        
         console.log('parametro proy_id: ',proy_id);
+
         if( proy_id > 0 ) {
             const proy = await getProyecto(proy_id);  
             setProyecto(proy)          
             // console.log("proy: ", proy.Nombre);
 
-            const etapa = await getProyEtapa(proy_id);
-            await setEtapa(etapa)
-            // console.log("etapa: ", etapa);
+            const etapas = await  getEtapas() 
+            setEtapas(etapas)
+            // console.log('Etapas: ',etapas)
 
-            const rev = await getRevision(proy_id, 1)
+            const proy_etapa = await getProyEtapa(proy_id);
+            await setProyEtapa(proy_etapa)            
+            // console.log("proy_etapa: ", proy_etapa);
+
+            setEtapa(etapas[proy_etapa.Etapa_Id-1])
+            // console.log('etapa: ',etapa)
+
+            const rev = await getRevision(proy_id,proy_etapa.Etapa_Id)
             setRevision(rev)
-            console.log("revision: ", rev);
+            // console.log("revision: ", rev);
+
+            const detRev = await getDeRev(proy_id, proy_etapa.Etapa_Id,rev.Revision_Id)
+            setDetalleRevision(detRev)
+            // console.log("detalle revision: ", detRev);
         } 
     }
 
@@ -96,10 +120,67 @@ const Revision = ({frontend,backend}) => {
         e.preventDefault(); // evitar recargar la página web (postback)
     }
 
-    const onClickCheck =(e) => {
-        alert('clik')
+    const onChangeCheck =(e) => {   
+        console.log('checked',e.target.checked)     
+        setIsChecked(e.target.checked);
+        // const { value, checked } = e.target;
+        // setCheckedItems([...checkedItems, value]);
     }
-    
+    const onClickCheck =(item) => {        
+        //console.log("item: ",item)
+
+        const result = detalleRevision.filter((det) => (
+            det.Check_List_Id == item.Check_List_Id
+        ));
+
+        console.log('result',!result.Marcado)
+        console.log('init',detalleRevision)   
+
+        if( result.length==0 ) {
+            setDetalleRevision( 
+                [...detalleRevision,{
+                    Proyecto_Id:detalleRevision.length+1,
+                    Etapa_Id:etapa.Etapa_Id,
+                    Revision_Id: revision.Revision_Id,
+                    Check_List_Id: item.Check_List_Id,
+                    Marcado: 1, 
+                    Fecha: '2024-11-11'
+                }]
+            );
+        }
+        else {            
+            setDetalleRevision( detalleRevision.map( (det) => (
+                det.Check_List_Id === item.Check_List_Id
+                ? {...det,Marcado:!det.Marcado} : det
+            )));
+
+            // detalleRevision.pop(result)    
+            // setDetalleRevision(detalleRevision)
+            // console.log('pop',detalleRevision)    
+
+            // result.Marcado = !result[0].Marcado
+
+            // detalleRevision.push(result)
+            // setDetalleRevision(detalleRevision)
+            // console.log('push',detalleRevision)    
+        }
+        //setIsChecked(e.target.checked);
+        // const { value, checked } = e.target;
+        // setCheckedItems([...checkedItems, value]);
+    }
+    const getCheck = (item) => {
+        
+        const res = detalleRevision.filter( (det) => (
+            det.Check_List_Id == item.Check_List_Id && det.Marcado 
+        ))
+
+        if( res.length > 0 ) {
+            console.log('check: ',res[0].Marcado)
+        }
+
+        return res[0] || false;
+    }
+
     return (
 	<div className="container" >        
         
@@ -124,20 +205,20 @@ const Revision = ({frontend,backend}) => {
 
             <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
                 <label className="control-label">QA Tester</label>
-                <input value={etapa.QA_Tester || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
+                <input value={proy_etapa.QA_Tester || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
             </div>
 
             
             <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <label className="control-label">Estado</label>
-                <input value={etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
+                <input value={proy_etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
             </div>
         </div>
 
         <div className="row form-group mt-3">
             <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
-                <label className="control-label">Etapa</label>
-                <input value={etapas[etapa.Etapa_Id-1].Etapa || ''}  type="text" name="etapa" className="form-control" readOnly="readonly" />
+                <label className="control-label">Etapa</label>                
+                <input value={etapa.Etapa || ''}  type="text" name="proy_etapa" className="form-control" readOnly="readonly" />
             </div>
 
             <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
@@ -162,7 +243,7 @@ const Revision = ({frontend,backend}) => {
                         {checkList.map((item, index)=>(
                             <tr key={index}>
                                 <td key={index}>{item.Item}</td>
-                                <td><input onClick={onClickCheck} value={item.Marcado} type="checkbox" className="form-check-input"/></td>
+                                <td><input onClick={()=>{onClickCheck(item)}} checked={getCheck(item)} onChange={onChangeCheck} type="checkbox" className="form-check-input"/></td>
                                 <td><input value={item.Fecha} type="date" className="form-control" /></td>
                             </tr>  
                         ))}

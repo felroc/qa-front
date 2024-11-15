@@ -37,8 +37,8 @@ const UserList = ({frontend,backend}) =>{
         
     }
 
-    useEffect(async()=>{
-        await getRoles();
+    useEffect( ()=>{
+        getRoles();
         getAllUsers();
         
     },[])

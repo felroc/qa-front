@@ -3,15 +3,17 @@ import TaskRow from "./TaskRow";
 import TaskForm from "./TaskForm";
 
 const initialState=[
-    {id:1, name:"Aprender React", prioridad:3, completado:true},
-    {id:2, name:"Probar React", prioridad:1, completado:false},
-    {id:3, name:"Mockup HTML", prioridad:1, completado:false},
-    {id:4, name:"Testing Reack", prioridad:1, completado:false},
+    {id:1, name:"Ver tutoriales de React", prioridad:3, completado:true},
+    {id:2, name:"Escribir código React.js", prioridad:1, completado:false},
+    {id:3, name:"Hacer front-end", prioridad:1, completado:false},
+    {id:4, name:"Hacer conexion a MySQL", prioridad:1, completado:false},
+    {id:5, name:"Hacer back-end", prioridad:1, completado:false},
+    {id:6, name:"Agregar Seguridad", prioridad:1, completado:false},
 ];
 
 const TaskTable = () => {
 
-    const headers = ["#", "Task", "Prioridad", "Completado"];
+    const headers = ["No.", "Task", "Prioridad", "Completado"];
     
     const [tasks,setTasks] = useState([]);
 
@@ -33,7 +35,7 @@ const TaskTable = () => {
     const headerStyle = {textAlign:"center", fontWeight:"bold"};
     return(
         <div>
-            <h1>Gestión de proyectos</h1>
+            <h1>Table Task</h1>
             <hr></hr>
             <TaskForm addNewTask={addNewTask}></TaskForm>
             <div className="row">
@@ -47,7 +49,7 @@ const TaskTable = () => {
                                 <th>Task</th>
                                 <th>Prioridad</th>
                                 <th>Completado</th> */}
-                                <th>Index</th>
+                                {/* <th>Index</th> */}
                                 {headers.map((header, index)=>(
                                     <th style={headerStyle} key={index}>{header}</th>
                                 ))}
