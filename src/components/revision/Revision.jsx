@@ -74,12 +74,18 @@ const Revision = ({frontend,backend}) => {
     }
     const addRevision = async (rev) =>{                
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend)
-        // const datos = {             
-        //     proyName,
-        //     user,
-        //     created,
-        //     estado 
-        // };
+        const datos = {             
+            Proyecto_Id:    rev.Proyecto_Id,
+            Etapa_Id:       rev.Etapa_Id+1,
+            Revision_Id:    rev.Revision_Id,
+            Estado:         'En Progreso',
+            FechaRevision:  moment(new Date()).format('YYYY-MM-DD'),
+            Cantidad_Defectos:   0,
+            Cantidad_Atrasos:    0,
+            Tasa_Defectos:       0,
+            Tasa_Correcciones:   0,
+            Tiempo_Resolucion:   0
+        };
 
         console.log('rev',rev);
 
@@ -137,7 +143,7 @@ const Revision = ({frontend,backend}) => {
             console.log('Respuesta del servidor:', data.affectedRows);
             //if( data.affectedRows === 1 ) {}
             if( data.affectedRows == 1 ) {
-                console.log('API Success'); 
+                // console.log('API Success'); 
                 // console.log(data);                
                 return data; // > 0 : "OK";
             }
@@ -175,7 +181,7 @@ const Revision = ({frontend,backend}) => {
 
             const proy_etapa = await getProyEtapa(proyId);
             await setProyEtapa(proy_etapa)            
-            // console.log("proy_etapa: ", proy_etapa);
+            console.log("proy_etapa: ", proy_etapa);
 
             setEtapa(etapas[proy_etapa.Etapa_Id-1])
             // console.log('etapa: ',etapa)
@@ -200,13 +206,72 @@ const Revision = ({frontend,backend}) => {
         load(proyId)
     }
 
+    
+    // Funcion para agregar una nueva etapa a un proyecto 
+    const addNewEtapa = async () =>{     
+        
+        // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
+        const datos = {           
+            id:             proy_etapa.Proyecto_Id,  
+            etapaId:        proy_etapa.Etapa_Id+1 ,
+            estado:         'En Proceso',
+            dev:            proy_etapa.Dev,
+            tester:         proy_etapa.QA_Tester,
+            manualTecnico:  proy_etapa.Manual_Tecnico,
+            manualDeploy:   proy_etapa.Manual_Despliegue,
+            cronograma:     proy_etapa.Cronograma,
+            ambiente:       proy_etapa.Ambiente, 
+            acceso:         proy_etapa.Accesso,
+            permisos:       proy_etapa.Permisos,
+            instanciaDB:    proy_etapa.Instancia_DB,
+            serverName:     proy_etapa.Server_Name,
+            fechaInicio:    moment(proy_etapa.Fecha_Inicio).format('YYYY-MM-DD'),
+            fechaFinal:     proy_etapa.Fecha_Final==null ? 'null' : proy_etapa.FechaFinal
+        };
+                
+        console.log(datos);
+        
+        await fetch(backend+'/api/qa/etapa', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Etapa Response:', data);
+            
+            if( data.affectedRows === 1 ) {
+                console.log('Etapa: API Success'); 
+                //console.log(data);
+                alert("Se creo la siguiente etapa.");
+                
+                return "OK";
+            } else {
+                console.error("Etapa: MySQL Error");
+                //console.log(data.info);
+                return data.info;
+            }
+        })
+        .catch(error => {
+            console.error('Etapa: API Error');
+            return error;
+        });
+    }
+
     const onSubmit = (e) => {
         e.preventDefault(); // evitar recargar la página web (postback)
-        //console.log(detalleRevision)
+        // console.log(detalleRevision)
         detalleRevision.map((det=>(
             addDetalleRevision(det)
         )))
-        // addRevision( revision ) siguiente etapa
+        const marcados = detalleRevision.filter(item => item.Marcado === 1 || item.Marcado==true);
+        // console.log('marcados', marcados.length)
+        if( checkList.length === marcados.length) { // siguiente etapa 
+            addNewEtapa()
+            // addRevision( revision ) 
+        }
     }
 
     const onChangeCheck =(e) => {   
@@ -224,7 +289,7 @@ const Revision = ({frontend,backend}) => {
         // console.log('result',!result.Marcado)        
 
         if( result.length==0 ) { //  insert
-            console.log('insert')
+            // console.log('insert')
             setDetalleRevision( 
                 [...detalleRevision,{
                     Proyecto_Id:proyecto.Proyecto_Id,
@@ -237,7 +302,7 @@ const Revision = ({frontend,backend}) => {
             );
         }
         else {            
-            console.log('update')
+            // console.log('update')
             setDetalleRevision( detalleRevision.map( (det) => (
                 det.Check_List_Id === item.Check_List_Id
                 ? {...det,Marcado:!det.Marcado,Fecha:'2024-11-12'} : det
@@ -253,7 +318,7 @@ const Revision = ({frontend,backend}) => {
         ))
 
         if( res.length > 0 ) {
-            // console.log('check: ',res[0].Marcado)
+            console.log('check: ',res[0].Marcado)
         }
 
         return res[0] || 0;
@@ -285,12 +350,11 @@ const Revision = ({frontend,backend}) => {
                 <label className="control-label">QA Tester</label>
                 <input value={proy_etapa.QA_Tester || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
             </div>
-
-            
+{/*             
             <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                 <label className="control-label">Estado</label>
                 <input value={proy_etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
-            </div>
+            </div> */}
         </div>
 
         <div className="row form-group mt-3">
