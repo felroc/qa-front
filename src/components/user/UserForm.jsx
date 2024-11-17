@@ -10,8 +10,11 @@ const MSG_NO_EMAIL = "Ingrese el correo electrónico";
 const MSG_NO_PWD = "Ingrese la contraseña";
 
 const UserForm = ({frontend,backend,addNewUser}) => {
+    const isNew = window.location.pathname.includes('/new/') ;
     const isReadOnly = window.location.pathname.includes('/view/') ? "isReadOnly":"";
-    const showTag = window.location.pathname.includes('/view/') ? "none" : "block";
+    const showTag = window.location.pathname.includes('/view/') ? "none" : "flex";
+    const showTag2 = window.location.pathname.includes('/view/') ? "none" : "block";
+
     const { username } = useParams();
     const navigate = useNavigate();
     const MySwal = withReactContent(Swal);
@@ -29,6 +32,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
     const [userName , setUserName] = useState("");
     const [fullName , setFullName] = useState("");
     const [email , setEmail] = useState("");
+    const [estado, setEstado] = useState("")
     const [pwd , setPwd] = useState("");
     const [confirma, setConfirma] = useState('');
     const [roles, setRoles] = useState([]);
@@ -43,15 +47,33 @@ const UserForm = ({frontend,backend,addNewUser}) => {
         const data = await response.json();
         console.log(data);
         //setEstados(data.filter(estado => estado.Etapa_Id === null)); etapa_id is null para todas las etapas 
-        setRoles(data);       
-        setRol_id(data[0].Rol_Id); // se toma el primer valor del combo box
+        await setRoles(data);
+        //await setRol_id(data[0]); // se toma el primer valor del combo box
+    }
+
+    const getUser = async (username) => {
+        if( username ) {
+            console.log(username)
+            const response = await fetch(backend+"/api/qa/user/"+username);
+            //console.log(response);
+            const data = await response.json();
+            console.log('getUser: ',data[0].Username);
+            console.log('getUser: ',data[0].Fullname);
+            //setEstados(data.filter(estado => estado.Etapa_Id === null)); etapa_id is null para todas las etapas         
+            await setUserName(data[0].Username)
+            await setFullName(data[0].Fullname)
+            await setEmail(data[0].Email)
+            await setPwd(data[0].Pwd)
+            await setConfirma(data[0].Pwd)
+            await setRol_id(data[0].Rol_Id); // se toma el primer valor del combo box        
+        }
     }
 
     // Evento Page Load
     useEffect( ()=>{
         inputName.current.focus();
         getRoles();
-
+        getUser(username)
     },[])
 
     
@@ -101,14 +123,14 @@ const UserForm = ({frontend,backend,addNewUser}) => {
 
     const createNewUser = async(valid)=>{
         if( valid ) {
-            alert(rol_id)
+            
             const datos = {            
                 userName,
                 fullName,
                 email,
-                pwd,
                 estado: 'Activo',
                 rol_id: rol_id,
+                pwd,
             }
             
             await fetch(backend+'/api/qa/user', {
@@ -122,7 +144,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
             .then(data => {
                 console.log('Respuesta del servidor:', data);
                 //if( data.affectedRows === 1 ) {}
-                if( data.msg === userName ) {
+                if( data.affectedRows == 1 ) {
                     console.info('Proyecto: API Success'); 
                     //console.log(data);
                     if( addNewUser!=undefined) addNewUser(datos);
@@ -131,7 +153,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
                     return "OK";
                 }
                 else {
-                    console.error("MySQL Error");
+                    console.error("MySQL Error:",data);
                     //console.log(data);
                     Notificacion(data.msg,"error");
                     return data;
@@ -151,59 +173,79 @@ const UserForm = ({frontend,backend,addNewUser}) => {
         <h1>Formulario de Usuario </h1>
         <hr></hr>
         
-        <div className="mb-3">
+        <div className="mt-3">
 
-            <div className="row">
-
-                <div className="col-md-4">
-                    <label htmlFor="fullname" className="form-label">Nombre Completo</label>
-                    <input readOnly={isReadOnly} type="text"value={fullName} onChange={onChangeFullName} name="fullname" className="form-control" required={true} ref={inputName} />
-                </div>
-            </div>
-
-            <div className="row"  >
-                <div className="col-md-4">
+            <div className="row mt-3"  >
+                <div className="col-md-6">
                     <label htmlFor="username" className="form-label">Usuario</label>
-                    <input readOnly={isReadOnly}  type="text" value={userName} onChange={onChangeUserName} name="username" className="form-control" required={true}/>
+                    <input readOnly={isReadOnly} type="text" value={userName||''} onChange={onChangeUserName} name="username" className="form-control" required={true}/>
                 </div>
+           
             </div>
 
-            <div className="row"  >
-                <div className="col-md-4">
+            
+            <div className="row mt-3">
+
+                <div className="col-md-6">
+                    <label htmlFor="fullname" className="form-label">Nombre Completo</label>
+                    <input readOnly={isReadOnly} type="text"value={fullName||''} onChange={onChangeFullName} name="fullname" className="form-control" required={true} ref={inputName} />
+                </div>
+                
+                <div className="col-md-6">
                     <label htmlFor="email" className="form-label">Correo electrónico</label>
-                    <input readOnly={isReadOnly}  type="text" value={email} onChange={onChangeEmail} name="email" className="form-control" required={true}/>
+                    <input readOnly={isReadOnly}  type="text" value={email||''} onChange={onChangeEmail} name="email" className="form-control" required={true}/>
                 </div>
             </div>
             
-            <div className="row">
-                <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
+            <div className="row mt-3">
+                
+                <div className="col-md-4">
                     <label htmlFor="rol" className="control-label">Rol</label>
                     <select disabled={isReadOnly} name="rol" value={rol_id} onChange={onChangeRol} onClick={onChangeRol} className="form-select" >
+                        <option value=' '></option>
                         {roles.map((item, index)=>(
-                            <option key={index} value={item.Rol_Id}>{item.Rolname}</option>
+                            <option key={item.Rol_Id} value={item.Rol_Id}>{item.Rol_name}</option>
                         ))}
                     </select>
                 </div>
             </div>
 
-            <div className="row" style={{display:showTag}} >
-                <div className="col-md-4">
+            <div className="row mt-3" style={{display:showTag}} >
+                
+                <div className="col-md-6">
                     <label htmlFor="pwd" className="form-label">Contraseña</label>
                     <input type="password" value={pwd} onChange={onChangePwd} name="pwd" className="form-control" required={true}/>
                 </div>
 
-                <div className="col-md-4" style={{display:showTag}} >
+                <div className="col-md-6" style={{display:showTag2}} >
+                    
                     <label htmlFor="confirma" className="form-label">Confirmacion de Contraseña</label>
                     <input type="password" value={confirma} onChange={onChangeConfirma} name="confirma" className="form-control" required={true}/>
+                    
                 </div>
             </div>
             
         </div>
+
         <div className="row mt-3">
-            <div className="col-md-4 contenedor"> 
-                <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
-                <span style={{width:50+"px"}}></span>
-                <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>
+            <div className="col-md-12 contenedor " > 
+                <div className="table-responsivex ">
+                <table className="table" >
+                    <tbody>
+                        <tr>
+                            <td style={{border:'0px'}}>
+                            <button disabled={isReadOnly} type="submit" className="btn btn-primary" style={{display:showTag2,width:150 +'px'}}>Guardar</button> 
+                            </td>
+                            <td style={{border:'0px'}}>
+                            <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <span style={{width:"50px"}}></span>
+
             </div>
         </div>
     </form>

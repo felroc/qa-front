@@ -11,7 +11,7 @@ const NavBar = () => {
     return(
         <Navbar bg="primary" variant="dark" expand="lg">
         <Container>
-          <Navbar.Brand as={NavLink} to="#">
+          <Navbar.Brand as={NavLink} to="/">
             Software QA
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -22,21 +22,27 @@ const NavBar = () => {
                   <Nav.Link as={NavLink} to="/dashboard">Dashboard</Nav.Link>
                   <Nav.Link as={NavLink} to="/proyecto">Proyecto</Nav.Link>
                   <Nav.Link as={NavLink} to="/gestion">Gestiones</Nav.Link>
-                  
+                  <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
                   <Nav.Link as={NavLink} to="/users">Usuarios</Nav.Link>
-                  <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>
-                  <Navbar.Text className="ms-auto">
-                    {user.fullname} - {user.rol_id}
-                  </Navbar.Text> 
+                  
+                  
                 </>
               ) : (
                 <>
-                <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
+                  {/* <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link> */}
                   <Nav.Link as={NavLink} to="/login">Login</Nav.Link>
                   {/* <Nav.Link as={NavLink} to="/task">Task</Nav.Link> */}
                 </>
-              )}
+              )}              
             </Nav>
+            {isAuthenticated ? (
+            <Nav className="me-auto">
+              <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>
+              <Navbar.Text className="ms-auto">
+                    {user.fullname} - {user.Rol_id}
+                  </Navbar.Text> 
+            </Nav>) : (<></>)
+            }
           </Navbar.Collapse>
         </Container>
       </Navbar>

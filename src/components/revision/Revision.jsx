@@ -1,11 +1,14 @@
+import "./Revision.css"
 import { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
-import "./Revision.css"
 import moment from 'moment';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import { useNavigate } from 'react-router-dom';
 
 const Revision = ({frontend,backend}) => { 
     const { proy_id } = useParams(); // /revision/:proy_id
-
+    const navigate = useNavigate();
     const [checkList, setCheckList] = useState([]);    
     const [proyId, setProyId] = useState([]);
     const [proyecto, setProyecto] = useState([]);
@@ -15,6 +18,18 @@ const Revision = ({frontend,backend}) => {
     const [revision, setRevision] = useState([]);
     const [detalleRevision, setDetalleRevision] = useState([])
     const [checked,setIsChecked]=useState(false)
+    const [detalleError, setDetalleError] = useState(false)
+
+    const MySwal = withReactContent(Swal);
+    const Notificacion = async (msg, icono) => {
+        await Swal.fire({
+            position: "top-end",
+            icon: icono,
+            title: msg,
+            showConfirmButton: false,
+            timer: 5000
+          });
+    }
 
     const getCheckList = async () => {
         const response = await fetch("http://localhost:8081/api/qa/checkList");
@@ -64,61 +79,18 @@ const Revision = ({frontend,backend}) => {
         // await setRevision(data[0]);
         return data[0];
     }
-    const getDeRev = async (proyId,etapaId,revId) => {
+
+    const getDetalleRev = async (proyId,etapaId,revId) => {
         const response = await fetch("http://localhost:8081/api/qa/detalle_revision/"+proyId+"/"+etapaId+"/"+revId);
         //console.log(response);
         const data = await response.json();
         // console.log('getRevision: ',data);
         await setDetalleRevision(data);
         return data;
-    }
-    const addRevision = async (rev) =>{                
-        // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend)
-        const datos = {             
-            Proyecto_Id:    rev.Proyecto_Id,
-            Etapa_Id:       rev.Etapa_Id+1,
-            Revision_Id:    rev.Revision_Id,
-            Estado:         'En Progreso',
-            FechaRevision:  moment(new Date()).format('YYYY-MM-DD'),
-            Cantidad_Defectos:   0,
-            Cantidad_Atrasos:    0,
-            Tasa_Defectos:       0,
-            Tasa_Correcciones:   0,
-            Tiempo_Resolucion:   0
-        };
-
-        console.log('rev',rev);
-
-        await fetch(backend+'/api/qa/detalle_revision', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(rev),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Respuesta del servidor:', data);
-            //if( data.affectedRows === 1 ) {}
-            if( data > 0 ) {
-                console.log('Proyecto: API Success'); 
-                console.log(data);                
-                return data; // > 0 : "OK";
-            }
-            else {
-                console.error("Proyecto: MySQL Error");
-                //console.log(data);
-                return data.info;
-            }
-        })
-        .catch(error => {
-            console.error('Proyecto: API Error');
-            console.log(error);
-            return error;
-        });
-    };      
+    }   
     
-    const addDetalleRevision = async (rev) =>{                
+    // Insert o Update if already exists
+    const addUpdateDetalleRevision = async (rev) =>{
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend)
         const datos = {             
             Proyecto_Id:    rev.Proyecto_Id,
@@ -128,9 +100,8 @@ const Revision = ({frontend,backend}) => {
             Marcado:        rev.Marcado,
             Fecha:          moment(rev.Fecha).format('YYYY-MM-DD')
         };
-
         // console.log('detalle',datos);
-
+        // Insert o Update if already exists
         await fetch(backend+'/api/qa/detalle_revision', {
             method: 'POST',
             headers: {
@@ -140,30 +111,30 @@ const Revision = ({frontend,backend}) => {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Respuesta del servidor:', data.affectedRows);
-            //if( data.affectedRows === 1 ) {}
+            // console.log(data);
+            console.log('addUpdateDetalleRevision:', data.affectedRows);
             if( data.affectedRows == 1 ) {
-                // console.log('API Success'); 
-                // console.log(data);                
-                return data; // > 0 : "OK";
+                // console.log('API Success');
+                // No mostrar notificacion
+                setDetalleError(false)
             }
             else {
-                console.error("MySQL Error");
-                //console.log(data);
-                return data.info;
+                console.error("addUpdateDetalleRevision MySQL Error: ",data.info);
+                setDetalleError(true)
             }
+            return data;
         })
         .catch(error => {
-            console.error('Proyecto: API Error');
-            console.log(error);
+            setDetalleError(true)
+            console.error('addUpdateDetalleRevision API Error: ',error);            
             return error;
         });
     };      
     
     // Evento Page Load
     useEffect( () => {        
-        load(proy_id);
         getCheckList();
+        load(proy_id);        
     },[])
 
     async function load(proyId) {      
@@ -181,7 +152,7 @@ const Revision = ({frontend,backend}) => {
 
             const proy_etapa = await getProyEtapa(proyId);
             await setProyEtapa(proy_etapa)            
-            console.log("proy_etapa: ", proy_etapa);
+            //console.log("proy_etapa: ", proy_etapa);
 
             setEtapa(etapas[proy_etapa.Etapa_Id-1])
             // console.log('etapa: ',etapa)
@@ -191,25 +162,14 @@ const Revision = ({frontend,backend}) => {
             setRevision(rev)
             
             // console.log('revision',revision)
-            const detRev = await getDeRev(proyId, proy_etapa.Etapa_Id,rev.Revision_Id)
+            const detRev = await getDetalleRev(proyId, proy_etapa.Etapa_Id,rev.Revision_Id)
             setDetalleRevision(detRev)
             // console.log("detalle: ", detRev);
         } 
     }
 
-    const onChangeProyId = async (e) => { 
-        await setProyId(e.target.value) 
-    }
-    const onClickBuscar = async(proyId) => {
-        console.log('proyId: ',proyId);
-        //await getProyecto(proyId);
-        load(proyId)
-    }
-
-    
     // Funcion para agregar una nueva etapa a un proyecto 
-    const addNewEtapa = async () =>{     
-        
+    const addNewEtapa = async () =>{        
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
         const datos = {           
             id:             proy_etapa.Proyecto_Id,  
@@ -243,11 +203,10 @@ const Revision = ({frontend,backend}) => {
             console.log('Etapa Response:', data);
             
             if( data.affectedRows === 1 ) {
-                console.log('Etapa: API Success'); 
+                //console.log('Etapa: API Success'); 
                 //console.log(data);
-                alert("Se creo la siguiente etapa.");
-                
-                return "OK";
+                console.log("Se creo la siguiente etapa.");                
+                return data //"OK";
             } else {
                 console.error("Etapa: MySQL Error");
                 //console.log(data.info);
@@ -260,18 +219,40 @@ const Revision = ({frontend,backend}) => {
         });
     }
 
-    const onSubmit = (e) => {
-        e.preventDefault(); // evitar recargar la página web (postback)
-        // console.log(detalleRevision)
-        detalleRevision.map((det=>(
-            addDetalleRevision(det)
-        )))
-        const marcados = detalleRevision.filter(item => item.Marcado === 1 || item.Marcado==true);
+    const onSubmit = async(e) => {
+        // evitar recargar la página web (postback)
+        e.preventDefault();       
+    }
+
+    const onSave = async() => {
+        const res = await detalleRevision.map((det=>(
+            addUpdateDetalleRevision(det) 
+       )))   
+
+       setDetalleError(true)
+       if( detalleError ) {
+        Notificacion('Valide la revisión...','warning') 
+       } 
+       else 
+       {
+        const marcados = detalleRevision.filter(item => item.Marcado === 1 || item.Marcado==true);       
         // console.log('marcados', marcados.length)
+
         if( checkList.length === marcados.length) { // siguiente etapa 
-            addNewEtapa()
-            // addRevision( revision ) 
+            if( etapa.Etapa_Id < 4 ) { // Produccion 
+                addNewEtapa()
+                Notificacion('Etapa completada satisfactoriamente.','success')
+                navigate('/proyecto')
+            }
+            else {
+                Notificacion('Gestión completada satisfactoriamente.','success')
+                navigate('/gestion')
+            }
         }
+        else {
+            Notificacion('Revisión guardada correctamente.','success')
+        }
+       }
     }
 
     const onChangeCheck =(e) => {   
@@ -311,6 +292,7 @@ const Revision = ({frontend,backend}) => {
         }
         // console.log('detalle.post',detalleRevision)   
     }
+
     const getCheck = (item) => {
         
         const res = detalleRevision.filter( (det) => (
@@ -319,25 +301,43 @@ const Revision = ({frontend,backend}) => {
 
         if( res.length > 0 ) {
             console.log('check: ',res[0].Marcado)
+            return res[0] || 0;
         }
 
         return res[0] || 0;
     }
 
+    const onDevolver = () => {
+        // cambiar estado
+    }
+
+    const onChangeProyId = async (e) => { 
+        await setProyId(e.target.value) 
+    }
+
+    const onClickBuscar = async(proyId) => {
+        console.log('proyId: ',proyId);
+        //await getProyecto(proyId);
+        load(proyId)
+    }
+
     return (
-	<div className="container" >        
+    <form onSubmit={onSubmit}>  
+    {/* form-inline form-horizontal */}
+	<div className="container mt-3 " >
         
-        <h1>Revisión del Desarrollo</h1>
-
-        <hr></hr>
-        {/* <div className="row form-group">
-            <form className="d-flex" role="search" onSubmit={onSearch}>
-                <input type="search" value={proyId} onChange={onChangeProyId} placeholder="Gestion ID" className="form-control me-2" aria-label="Search"/>
-                <button type="submit" onClick={()=>{onClickBuscar(proyId)}} className="btn btn-info btn-outline-success btn-darkx ">Buscar</button>
-            </form>
+        <div className="row ">
+            <div className="col-md-6 ">
+                <h1>Revisión del Desarrollo</h1>
+            </div>
+            <div className="col-md-6 " role="search" >                
+                <div className="d-flex">
+                    <input type="search" value={proyId} onChange={onChangeProyId} placeholder="Gestion ID" className="form-control me-2" aria-label="Search"/>
+                    <button type="button" onClick={()=>{onClickBuscar(proyId)}} className="btn btn-info btn-outline-successx ">Buscar</button>
+                </div>                
+            </div>
         </div>
-
-        <hr></hr> */}
+        <hr></hr>
 
         <div className="row form-group">
 
@@ -350,14 +350,7 @@ const Revision = ({frontend,backend}) => {
                 <label className="control-label">QA Tester</label>
                 <input value={proy_etapa.QA_Tester || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
             </div>
-{/*             
-            <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <label className="control-label">Estado</label>
-                <input value={proy_etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
-            </div> */}
-        </div>
-
-        <div className="row form-group mt-3">
+            
             <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
                 <label className="control-label">Etapa</label>                
                 <input value={etapa.Etapa || ''}  type="text" name="proy_etapa" className="form-control" readOnly="readonly" />
@@ -367,7 +360,14 @@ const Revision = ({frontend,backend}) => {
                 <label className="control-label">Revisión</label>
                 <input value={revision.Revision_Id || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
             </div>
+        </div>
 
+        <div className="row form-group mt-3">           
+{/*             
+            <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <label className="control-label">Estado</label>
+                <input value={proy_etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
+            </div> */}
         </div>
 
         <hr></hr>
@@ -377,7 +377,7 @@ const Revision = ({frontend,backend}) => {
                 <thead>
                     <tr>
                         <th>Pruebas</th>
-                        <th style={{width:170+'px'}}>Satisfactorio</th>
+                        <th style={{width:170+'px'}}>Estado</th>
                         <th>Fecha de Validación</th>
                     </tr>
                 </thead>
@@ -385,7 +385,12 @@ const Revision = ({frontend,backend}) => {
                         {checkList.map((item, index)=>(
                             <tr key={index}>
                                 <td key={index}>{item.Item}</td>
-                                <td><input onClick={()=>{onClickCheck(item)}} checked={getCheck(item)} onChange={onChangeCheck} type="checkbox" className="form-check-input"/></td>
+                                <td>
+                                    <div className="form-check form-switch">
+                                        <input id={'chk'+index} checked={getCheck(item)}  onClick={()=>{onClickCheck(item)}} onChange={onChangeCheck} type="checkbox" className="form-check-input"/>
+                                        <label className="form-check-label" htmlFor={'chk'+index}> {getCheck(item)?'Satisfactorio':'No Satisfactorio'} </label>
+                                    </div>
+                                </td>
                                 <td><input value={item.Fecha} type="date" className="form-control" /></td>
                             </tr>  
                         ))}
@@ -395,16 +400,20 @@ const Revision = ({frontend,backend}) => {
         </div>    
 
         <div className="row mt-3">
-                <div className="col-md-12 contenedor">              
-                <form className="d-flex" role="search" onSubmit={onSubmit}>  
-                    <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
-                </form>
-                    {/* <span style={{width:50 +'px'}}></span>
-                    <button type="button" className="btn btn-success" style={{width:150 +'px'}}>Revisión</button>  */}
+                <div className="col-md-12 contenedor">
+                    <button onClick={()=>{onSave()}} type="button" className="btn btn-success" style={{width:150 +'px'}}>Guardar</button>
+
+                    <span style={{width:50 +'px'}}></span>
+
+                    <button onClick={()=>{onDevolver()}} type="button" className="btn btn-danger" style={{width:150 +'px'}}>Devolver</button>
+
+                    <span style={{width:50 +'px'}}></span>
+                    
+                    <button onClick={()=>{navigate('/gestion')}} type="button" className="btn btn-info" style={{width:150 +'px'}}>Gestiones</button>
                 </div>
             </div>
     </div>
-
+    </form>
     )
 }
 

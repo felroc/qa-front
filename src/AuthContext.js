@@ -5,7 +5,12 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    ()=> {
+      const storedUser = localStorage.getItem('user');      
+      return storedUser
+    }
+  );
 
   const [user, setUser] = useState({
     username: null,
@@ -13,8 +18,15 @@ export const AuthProvider = ({ children }) => {
     rol_id: null,
   });
 
-  const navigate = useNavigate();
-
+   // Recuperar
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setIsAuthenticated(true)
+    }
+  }, []);
+  
+  // Recuperar
   // useEffect(() => {
   //   const storedUser = localStorage.getItem('user');
   //   if (storedUser) {
@@ -23,19 +35,36 @@ export const AuthProvider = ({ children }) => {
   //   }
   // }, []);
 
-  useEffect(() => {
-    localStorage.setItem('user', JSON.stringify(user));
-  }, [user]);
+  // // Guardar 
+  // useEffect(() => {
+  //   console.log('AUTH Guardar')
+  //   localStorage.setItem('user', JSON.stringify(user));
+  // }, [user]);
 
-  const login = (username, fullname, rol_id) => {
+  const login = async (data) => {    
     setIsAuthenticated(true);
-    setUser({ username, fullname, rol_id });
-    navigate("/"); // Redirige a la página protegida después de iniciar sesión
+
+    console.log('AUTH LOGIN: ', isAuthenticated)
+    console.log('data:', data.username, data.fullname, data.rol_id)    
+    
+    localStorage.setItem('user', JSON.stringify(data)); // se debe guardar el objeto como JSON
+    
+    await setUser(data);    
+    console.log('user:',user )
+    
+    //navigate("/"); // Redirige a la página protegida después de iniciar sesión
   };
 
   const logout = () => {    
+    console.log('AUTH LOGOUT')
+
     setIsAuthenticated(false);    
-    //navigate("/login"); // Redirige a la página de inicio de sesión después de cerrar sesión
+
+    localStorage.removeItem('user');
+   
+    //setUser(null);
+
+    //navigate("/login");
   };
 
   return (

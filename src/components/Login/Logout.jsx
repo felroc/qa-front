@@ -1,26 +1,24 @@
 import { useEffect } from "react"
 import { useAuth } from "../../AuthContext";
-
+import { useNavigate } from "react-router-dom";
 
 const LogOut = () => {
-
+    const navigate = useNavigate();
     const { logout, setUser } = useAuth();
     
-    useEffect( () => {
+    useEffect( () => {        
         logout();        
-        setUser(null);
-        localStorage.removeItem('user');
-        const storedUser = localStorage.getItem('user');
-        console.log('storedUser: ',storedUser)
     },[])
     
     return (
         <>
-            <h1>Cierre de sesión</h1>
+            <h1 className="mt-3">Cierre de sesión</h1>
             <hr></hr>
             <p>
                 La sesión ha sido cerrada correctamente.
             </p>
+            <hb></hb>
+            <button type="button" onClick={()=>{navigate('/login')}} className='btn btn-primary'>Login</button>
         </>
     )
 }

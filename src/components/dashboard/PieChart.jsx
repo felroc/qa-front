@@ -5,7 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 
-const PieChart = ({labels,datos,tbl}) => {  
+const PieChart = ({labels,datos}) => {  
 
   // console.log('pie chart: ',datos);
   // console.log('vec', [15, 10, 5, 55, 10])
@@ -21,7 +21,7 @@ const PieChart = ({labels,datos,tbl}) => {
         'rgba(255, 99, 132, 0.5)', // Rojo
         "rgba(255, 159, 64, 0.5)", // Naranja
         "rgba(153, 102, 255, 0.5)", // Purple
-        //"rgba(255, 206, 86, 0.5)", // Amarillo
+        "rgba(255, 206, 86, 0.5)", // Amarillo
       ],
       borderWidth: 1, // apagado
       borderColor: [
@@ -30,7 +30,7 @@ const PieChart = ({labels,datos,tbl}) => {
         'rgba(255, 99, 132, 1)', // Rojo
         "rgba(255, 159, 64, 1)", // Naranja
         "rgba(153, 102, 255, 1)", // Purple
-        //"rgba(255, 206, 86, 0.5)", // Amarillo
+        "rgba(255, 206, 86, 0.5)", // Amarillo
       ],      
     }]
   }

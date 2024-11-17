@@ -16,12 +16,12 @@ import Welcome from './components/Welcome';
 import GestionForm from './components/gestion/GestionForm';
 import GestionList from './components/gestion/GestionList';
 import Revision from './components/revision/Revision';
-import LoginForm from './components/LoginForm/LoginForm';
+import Login from './components/Login/Login';
 import UserList from './components/user/UserList';
 import TaskTable from './components/task/TaskTable';
 import UserForm from './components/user/UserForm'; 
 import Dashboard from './components/dashboard/dashboard';
-import LogOut from './components/LoginForm/Logout';
+import LogOut from './components/Login/Logout';
 
 const frontend = "localhost:3000"; // URL del fronted
 const backend = "http://localhost:8081"; // URL del backend
@@ -52,7 +52,7 @@ root.render(
           <Routes>
             
             <Route path='/' element={<Welcome></Welcome>}></Route>
-            <Route path='/login' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
+            <Route path='/login' element={<Login frontend={frontend}></Login>}></Route>
 
             <Route path='/dashboard' element={
                <ProtectedRoute>
@@ -67,6 +67,12 @@ root.render(
               </ProtectedRoute>
               }>
             </Route>
+            <Route path='/proyecto/:id' element={
+              <ProtectedRoute>
+              <GestionForm frontend={frontend} backend={backend}/>
+              </ProtectedRoute>
+              }>
+            </Route>
 
             <Route path='/gestion' element={
               <ProtectedRoute>
@@ -74,11 +80,11 @@ root.render(
               </ProtectedRoute>
               }>                
             </Route>
-
+          
             <Route path='/revision/:proy_id' element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
               <Revision backend={backend}/>
-              // </ProtectedRoute>
+              </ProtectedRoute>
               }>                
             </Route>
 

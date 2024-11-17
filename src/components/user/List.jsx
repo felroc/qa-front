@@ -30,11 +30,8 @@ const UserList = ({frontend,backend}) =>{
         const response = await fetch(backend+"/api/qa/users");
         //console.log(response);
         const data = await response.json();
-        //console.log(data);
-        
+        console.log(data);        
         await setUsers(data);
-
-        
     }
 
     useEffect( ()=>{
@@ -134,7 +131,7 @@ const UserList = ({frontend,backend}) =>{
         <button className="btn btn-success" onClick={()=>{navigate('/users/new')}}>Crear Usuario</button>
         <br></br>
         <div className="table-responsive">
-            <table border="1" cellPadding="10" cellSpacing="0" className="table table-striped table-bordered table-hover table-dark1">
+            <table className="table table-striped table-borderedx table-hover table-dark1">
                 <thead>
                     <tr>
                         {headers.map((header, index)=>(
@@ -149,12 +146,12 @@ const UserList = ({frontend,backend}) =>{
                         <tr key={index}>
                             <td>{user.Username}</td>                            
                             <td>{user.Fullname}</td>
-                            <td>{user.Email}</td>
-                            <td>{roles[user.Rol_Id-1].Rolname}</td>
+                            <td>{user.Email}</td>                            
+                            <td>{roles[user.Rol_Id-1].Rol_name}</td>
                             <td>{moment(user.Created).format('DD MMMM YYYY')}</td>
-                            <td><button onClick={()=>{onView(user.Username)}} className="btn btn-info1 btn-dark">Consultar</button></td>
-                            <td><button onClick={()=>{onEdit(user.Username)}} className="btn btn-warning1 btn-dark">Editar</button></td>
-                            <td><button onClick={()=>{onDelete(user.Username)}} className="btn btn-danger1 btn-dark">Eliminar</button></td>
+                            <td><button onClick={()=>{onView(user.Username)}} className="btn btn-info btn-dark1">Consultar</button></td>
+                            <td><button onClick={()=>{onEdit(user.Username)}} className="btn btn-warning btn-dark1">Editar</button></td>
+                            <td><button onClick={()=>{onDelete(user.Username)}} className="btn btn-danger btn-dark1">Eliminar</button></td>
                         </tr>
                     ))}
                 </tbody>
