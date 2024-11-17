@@ -197,7 +197,7 @@ const GestionForm = ({fronted,backend})=> {
         const datos = {           
             id,  
             etapaId, // default 1
-            estado: 'En cola',
+            estado: 'En Proceso',
             dev,
             tester,
             manualTecnico,

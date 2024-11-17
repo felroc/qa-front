@@ -1,12 +1,23 @@
-//import { getSuggestedQuery } from "@testing-library/react";
+import "./GestionList.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment'; 
-import "./GestionList.css";
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
-const GestionList = () => {
+const GestionList = ({backend}) => {
     const navigate = useNavigate();
     const [proys, setProys] = useState([]);
+
+    const Notificacion = (msg, icono="success") => {
+        Swal.fire({
+            position: "top-end",
+            icon: icono,
+            title: msg,
+            showConfirmButton: false,
+            timer: 3000
+          });
+    }
 
     const getProys = async () =>{
         const response = await fetch("http://localhost:8081/api/qa/proyectos");
@@ -25,7 +36,55 @@ const GestionList = () => {
         navigate("/revision/"+Proyecto_Id)
     }
     const onDelete = (Proyecto_Id) => {
-        alert(Proyecto_Id)
+        Swal.fire({
+            title: "¿Desea eliminar el proyecto?",
+            showDenyButton: true,
+            showConfirmButton: false,
+            showCancelButton: true,
+            confirmButtonColor: "danger",
+            //confirmButtonText: "Eliminar",
+            denyButtonText: `Eliminar`
+            }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                Swal.fire("Saved!", "", "success");                
+            } else if (result.isDenied) {
+                var res = deleteProy(Proyecto_Id);
+                //Swal.fire("El usuario fue eliminado del sistema", "", "info");
+            }
+        });   
+    }
+    const deleteProy = async(id) => {
+        console.log( 'Proyecto_Id: ',id );
+        const datos = { id } 
+                
+        const response = await fetch(backend+'/api/qa/proyecto', {
+            method: 'DELETE',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('deleteProy:', data);
+            
+            if( data.affectedRows == 1 ) {
+                setProys(proys.filter(p => p.Proyecto_Id !== id));            
+                Notificacion("El proyecto se eliminó correctamente!","success")
+                return "OK";
+            }
+            else {
+                console.error("MySQL Error",data);                
+                //Notificacion("No fue posible eliminar el proyecto...","error");
+                return data;
+            }
+        })
+        .catch(error => {
+            console.error('API Error',error);            
+            Notificacion('API Error',"error");
+            return error;
+        }); 
     }
 
     return (

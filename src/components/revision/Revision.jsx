@@ -18,10 +18,12 @@ const Revision = ({frontend,backend}) => {
     const [revision, setRevision] = useState([]);
     const [detalleRevision, setDetalleRevision] = useState([])
     const [checked,setIsChecked]=useState(false)
+    const [selectedDate, setSelectedDate] = useState(new Date());
     const [detalleError, setDetalleError] = useState(false)
+    const [item,setItem] = useState(0)
 
     const MySwal = withReactContent(Swal);
-    const Notificacion = async (msg, icono) => {
+    const Notificacion = async (msg, icono='success') => {
         await Swal.fire({
             position: "top-end",
             icon: icono,
@@ -48,7 +50,7 @@ const Revision = ({frontend,backend}) => {
         // console.log('getProyecto data',data[0]);        
         await setProyecto(data); // no works
         //await setProyecto(data[0]); // no works
-        //console.log('getProyecto: ',proyecto); 
+        // console.log('getProyecto: ',data); 
         return data[0];
         }catch(error){
             console.error('error',error)
@@ -60,7 +62,7 @@ const Revision = ({frontend,backend}) => {
         const response = await fetch("http://localhost:8081/api/qa/proy_etapa/"+proyId);
         //console.log(response);
         const data = await response.json();
-        // console.log('getProyEtapa: ',data);
+        // console.log('getProyEtapa: ',data[0]);
         // setProyEtapa(data);
         return data[0];
     }
@@ -76,12 +78,12 @@ const Revision = ({frontend,backend}) => {
     
     // Devuelve la ultima revision
     const getRevision = async (proyId,etapaId) => {
-        console.log('getRevision...',proyId,etapaId)
+        // console.log('getRevision...',proyId,etapaId)
         const response = await fetch("http://localhost:8081/api/qa/revision/"+proyId+"/"+etapaId);
         //console.log(response);
         const data = await response.json();
-        // console.log('getRevision: ',data);
-        await setRevision(data[0]);
+        // console.log('getRevision: ',data[0]);
+        //await setRevision(data[0]);
         return data[0];
     }
 
@@ -89,7 +91,7 @@ const Revision = ({frontend,backend}) => {
         const response = await fetch("http://localhost:8081/api/qa/detalle_revision/"+proyId+"/"+etapaId+"/"+revId);
         //console.log(response);
         const data = await response.json();
-        // console.log('getRevision: ',data);
+        // console.log('getDetalleRev: ',data);
         await setDetalleRevision(data);
         return data;
     }   
@@ -105,7 +107,7 @@ const Revision = ({frontend,backend}) => {
             Marcado:        rev.Marcado,
             Fecha:          moment(rev.Fecha).format('YYYY-MM-DD')
         };
-        // console.log('detalle',datos);
+        // console.log('rev fecha',datos.Fecha);
         // Insert o Update if already exists
         await fetch(backend+'/api/qa/detalle_revision', {
             method: 'POST',
@@ -148,6 +150,7 @@ const Revision = ({frontend,backend}) => {
         // console.log('proyId: ',proyId);
 
         if( proyId > 0 ) {
+            await setProyId(proyId) 
             const proy = await getProyecto(proyId);
             if( proy ) {
                 setProyecto(proy)          
@@ -215,7 +218,7 @@ const Revision = ({frontend,backend}) => {
             
             if( data.affectedRows === 1 ) {
                 //console.log('Etapa: API Success',data);              
-                Notificacion("Se creo la siguiente etapa.",'success');
+                // Notificacion("Se creo la siguiente etapa.",'success');
                 return data //"OK";
             } else {
                 console.error("addNewEtapa MySQL ",data);
@@ -236,7 +239,7 @@ const Revision = ({frontend,backend}) => {
             cantidad
         }
                 
-        console.log(datos);
+        // console.log(datos);
         
         await fetch(backend+'/api/qa/dashboard', {
             method: 'PUT',
@@ -253,13 +256,13 @@ const Revision = ({frontend,backend}) => {
                 //console.log('Etapa: API Success',data);                 
                 return data //"OK";
             } else {
-                console.error("dashboard MySQL");
+                console.error("dashboard MySQL",data);
                 //console.log(data.info);
-                return data.info;
+                return data;
             }
         })
         .catch(error => {
-            console.error('dashboard API');
+            console.error('dashboard API',error);
             return error;
         });
     }
@@ -271,7 +274,7 @@ const Revision = ({frontend,backend}) => {
             estado
         }
                 
-        console.log(datos);
+        // console.log(datos);
         
         await fetch(backend+'/api/qa/proyecto', {
             method: 'PATCH',
@@ -288,13 +291,13 @@ const Revision = ({frontend,backend}) => {
                 //console.log('patchProyecto: API Success',data);                 
                 return data //"OK";
             } else {
-                console.error("patchProyecto: MySQL Error");
+                console.error("patchProyecto MySQL ",data);
                 //console.log(data.info);
-                return data.info;
+                return data;
             }
         })
         .catch(error => {
-            console.error('patchProyecto: API Error');
+            console.error('patchProyecto API ',error);
             return error;
         });
     }
@@ -309,7 +312,7 @@ const Revision = ({frontend,backend}) => {
             Estado:         "En Revision"
         }
                 
-        console.log(datos);
+        // console.log('insertRevision',datos);
         
         await fetch(backend+'/api/qa/revision', {
             method: 'POST',
@@ -327,13 +330,48 @@ const Revision = ({frontend,backend}) => {
                 
                 return data //"OK";
             } else {
-                console.error("insertRevision MySQL");
+                console.error("insertRevision MySQL",data);
+                //console.log(data.info);
+                return data;
+            }
+        })
+        .catch(error => {
+            console.error('insertRevision API',error);
+            return error;
+        });
+    }
+
+    const patchProyEtapa = async (id, estado, etapaId) =>{        
+        // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
+        const datos = {           
+            id, 
+            etapaId,
+            estado
+        }                
+        // console.log('patchProyEtapa',datos);
+        
+        await fetch(backend+'/api/qa/etapa', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // console.log('patchProyecto Response:', data);
+            
+            if( data.affectedRows === 1 ) {
+                //console.log('patchProyecto: API Success',data);                 
+                return data //"OK";
+            } else {
+                console.error("patchProyecto MySQL ",data);
                 //console.log(data.info);
                 return data.info;
             }
         })
         .catch(error => {
-            console.error('insertRevision API',error);
+            console.error('patchProyecto API ',error);
             return error;
         });
     }
@@ -345,11 +383,12 @@ const Revision = ({frontend,backend}) => {
 
     const onSave = async(proyId) => {        
         if(proyId > 0) {
+            setDetalleError(true)
+
             const res = await detalleRevision.map((det=>(
                 addUpdateDetalleRevision(det) 
            )))   
-    
-           setDetalleError(true)
+               
            if( detalleError ) {
             Notificacion('Valide la revisión...','warning') 
            } 
@@ -359,23 +398,26 @@ const Revision = ({frontend,backend}) => {
                 
                 if( marcados.length >= checkList.length) { // siguiente etapa 
                     if( etapa.Etapa_Id < 4 ) { // Produccion 
+                        patchProyEtapa(proyecto.Proyecto_Id,"Revisión Satifactoria", proy_etapa.Etapa_Id)
                         addNewEtapa()
                         updateDashboard(2,1) // revision
                         patchProyecto(proyecto.Proyecto_Id, 'Revisión de QA en Proceso')
                         Notificacion('Etapa completada satisfactoriamente.','success')
-                        navigate('/proyecto')
+                        //navigate('/proyecto')
                     }
                     else {
+                        patchProyEtapa(proyecto.Proyecto_Id,"Revisión Satifactoria", proy_etapa.Etapa_Id)
                         await updateDashboard(4,1) // aprobado
                         patchProyecto(proyecto.Proyecto_Id, 'QA Satisfactorio')
                         Notificacion('Gestión completada satisfactoriamente.','success')
-                        navigate('/gestion')
+                        // navigate('/gestion')
                     }
                 }
                 else if(marcados.length > 0) {
                     Notificacion('Revisión guardada correctamente.','success')
                     updateDashboard(2,1) // revision
                     patchProyecto(proyecto.Proyecto_Id, 'Revisión de QA en Proceso')
+                    patchProyEtapa(proyecto.Proyecto_Id, 'En Revisión',proy_etapa.Etapa_Id)
                 }
            }
         }
@@ -385,9 +427,9 @@ const Revision = ({frontend,backend}) => {
         
     }
 
-    const onChangeCheck =(e) => {   
+    const onChangeCheck = async(e) => {   
         // console.log('checked',e.target.checked)     
-        setIsChecked(e.target.checked);
+        await setIsChecked(e.target.checked);
     }
 
     const onClickCheck =(item) => {        
@@ -408,7 +450,7 @@ const Revision = ({frontend,backend}) => {
                     Revision_Id: revision.Revision_Id,
                     Check_List_Id: item.Check_List_Id,
                     Marcado: 1, 
-                    Fecha: "2024-11-14 0:00"
+                    Fecha: null
                 }]
             );
         }
@@ -416,7 +458,7 @@ const Revision = ({frontend,backend}) => {
             // console.log('update')
             setDetalleRevision( detalleRevision.map( (det) => (
                 det.Check_List_Id === item.Check_List_Id
-                ? {...det,Marcado:!det.Marcado,Fecha:'2024-11-12'} : det
+                ? {...det,Marcado:!det.Marcado} : det
             )));
 
         }
@@ -436,25 +478,106 @@ const Revision = ({frontend,backend}) => {
 
         return res[0] || 0;
     }
+    
+    const onChangeDate = (e) => {
+        setSelectedDate(e.target.value);
+        
+        console.log("onChangeDate: ",e.target.value)
+
+        const result = detalleRevision.filter((det) => (
+            det.Check_List_Id == item.Check_List_Id 
+        ));        
+
+        if( result.length==0 ) { //  insert
+            
+            // console.log('insert')
+            setDetalleRevision( 
+                [...detalleRevision,{
+                    Proyecto_Id:proyecto.Proyecto_Id,
+                    Etapa_Id:etapa.Etapa_Id,
+                    Revision_Id: revision.Revision_Id,
+                    Check_List_Id: item.Check_List_Id,
+                    Marcado: 0, 
+                    Fecha: moment(e.target.value).format('YYYY-MM-DD')
+                }]
+            );
+        }
+        else {            
+            // console.log('update')
+            console.log('result',result[0].Fecha)
+            setDetalleRevision( detalleRevision.map( (det) => (
+                det.Check_List_Id === item.Check_List_Id
+                ? {...det,Fecha:moment(e.target.value).format('YYYY-MM-DD')} : det
+            )));
+
+        }  
+    }
+
+    const onClickDate = (item) => {
+        setItem(item)
+        console.log("onClickDate: ",item)
+
+        // const result = detalleRevision.filter((det) => (
+        //     det.Check_List_Id == item.Check_List_Id 
+        // ));        
+
+        // if( result.length==0 ) { //  insert
+            
+        //     // console.log('insert')
+        //     setDetalleRevision( 
+        //         [...detalleRevision,{
+        //             Proyecto_Id:proyecto.Proyecto_Id,
+        //             Etapa_Id:etapa.Etapa_Id,
+        //             Revision_Id: revision.Revision_Id,
+        //             Check_List_Id: item.Check_List_Id,
+        //             Marcado: 0, 
+        //             Fecha: moment(selectedDate).format('YYYY-MM-DD')
+        //         }]
+        //     );
+        // }
+        // else {            
+        //     // console.log('update')
+        //     console.log('result',result[0].Fecha)
+        //     setDetalleRevision( detalleRevision.map( (det) => (
+        //         det.Check_List_Id === item.Check_List_Id
+        //         ? {...det,Fecha:moment(selectedDate).format('YYYY-MM-DD')} : det
+        //     )));
+        // }          
+    }
+    const getDate = (item) => {
+
+        // si no esta en detalleRevision no se muestra
+        const res = detalleRevision.filter( (det) => (
+            det.Check_List_Id == item.Check_List_Id 
+        ))
+
+        if( res.length > 0 ) {            
+            // console.log('item.Check_List_Id',item.Check_List_Id)
+            // console.log('date: ',res)
+            // console.log('getDate: ',res[0])
+            // console.log('getDate: ',res[0].Fecha)
+            return moment(res[0].Fecha).format('YYYY-MM-DD')  || selectedDate;
+        }
+
+        return res[0] || 0;
+    }
 
     const onDevolver = async() => {
         // cambiar estado
         updateDashboard(3,1) // correccion
-        patchProyecto(proyecto.Proyecto_Id, 'Pendiente de Corrección')
+        patchProyecto(proyecto.Proyecto_Id, 'Pendiente de Corrección') 
+        patchProyEtapa(proyecto.Proyecto_Id, 'Pendiente de Corrección',proy_etapa.Etapa_Id)
         insertRevision()
         load(proyecto.Proyecto_Id)
-
-        // revision.Revision_Id++                
-        // await setRevision(revision)
-        // console.log('revision ',revision)        
-        // const rev = getRevision(proyecto.Proyecto_Id, etapa.Etapa_Id)
-        // console.log('rev',rev)
-        // // await setRevision(rev)
+        Notificacion("El desarrollo fue devuelto para correcciones.",'success')
     }
     const onRechazado = () => {
         // cambiar estado
         updateDashboard(5,1) // correccion
         patchProyecto(proyecto.Proyecto_Id, 'Desarrollo Rechazado')
+        patchProyEtapa(proyecto.Proyecto_Id, 'Desarrollo Rechazado',proy_etapa.Etapa_Id)
+        Notificacion("El desarrollo fue rechazado.",'success')
+        load(proyId)
     }
     const onDescartar = () => {
         // cambiar estado
@@ -497,11 +620,6 @@ const Revision = ({frontend,backend}) => {
                     <label className="control-label">Nombre de Proyecto</label>
                     <input value={proyecto.Nombre || ''} type="text" name="proy" className="form-control" readOnly="readonly" />
                 </div>
-
-                <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
-                    <label className="control-label">QA Tester</label>
-                    <input value={proy_etapa.QA_Tester || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
-                </div>
                 
                 <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
                     <label className="control-label">Etapa</label>                
@@ -515,11 +633,27 @@ const Revision = ({frontend,backend}) => {
             </div>
 
             <div className="row form-group mt-3">           
-    {/*             
+                
+                <div className="col-lg-3 col-md-4 col-sm-3 col-xs-3">
+                    <label className="control-label">QA Tester</label>
+                    <input value={proy_etapa.QA_Tester || ''} type="text" name="tester" className="form-control" readOnly="readonly" />
+                </div>
+                
                 <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Estado</label>
                     <input value={proy_etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
+                </div>
+
+                {/* <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <label className="control-label">Cantidad de Defectos</label>
+                    <input value={revision.Cantidad_Defectos || ''} onChange={onChangeCheck} name="defectos" type="text" className="form-control" />
+                </div>
+
+                <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <label className="control-label">Cantidad de Atrasos</label>
+                    <input value={revision.Cantidad_Defectos || ''} onChange={onChangeCheck} type="text" className="form-control" />
                 </div> */}
+
             </div>
 
             <hr></hr>
@@ -529,7 +663,7 @@ const Revision = ({frontend,backend}) => {
                     <thead>
                         <tr>
                             <th>Pruebas</th>
-                            <th style={{width:170+'px'}}>Estado</th>
+                            <th style={{width:210+'px'}}>Estado</th>
                             <th>Fecha de Revisión</th>
                         </tr>
                     </thead>
@@ -539,11 +673,11 @@ const Revision = ({frontend,backend}) => {
                                     <td key={index}>{item.Item}</td>
                                     <td>
                                         <div className="form-check form-switch">
-                                            <input id={'chk'+index} checked={getCheck(item)}  onClick={()=>{onClickCheck(item)}} onChange={onChangeCheck} type="checkbox" className="form-check-input"/>
+                                            <input id={'chk'+index} checked={getCheck(item)} onClick={()=>{onClickCheck(item)}} onChange={onChangeCheck} type="checkbox" className="form-check-input"/>
                                             <label className="form-check-label" htmlFor={'chk'+index}> {getCheck(item)?'Satisfactorio':'No Satisfactorio'} </label>
                                         </div>
                                     </td>
-                                    <td><input value={item.Fecha} type="date" className="form-control" /></td>
+                                    <td><input value={getDate(item)} onClick={()=>{onClickDate(item)}} onChange={onChangeDate } type="date" className="form-control" /></td>
                                 </tr>  
                             ))}
                     </tbody>
