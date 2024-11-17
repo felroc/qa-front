@@ -1,11 +1,20 @@
+<<<<<<< HEAD
 //import { getSuggestedQuery } from "@testing-library/react";
+=======
+import "./UserList.css"
+
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
 import { useState, useEffect } from "react";
 import moment from 'moment'; 
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+<<<<<<< HEAD
 import "./UserList.css"
+=======
+
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
 import UserForm from "./UserForm";
 
 const UserList = ({frontend,backend}) =>{
@@ -30,6 +39,7 @@ const UserList = ({frontend,backend}) =>{
         const response = await fetch(backend+"/api/qa/users");
         //console.log(response);
         const data = await response.json();
+<<<<<<< HEAD
         // console.log(data);        
         await setUsers(data);
     }
@@ -42,6 +52,17 @@ const UserList = ({frontend,backend}) =>{
         await setRoles(data);        
     }
 
+=======
+<<<<<<<< HEAD:src/components/user/List.jsx
+        console.log(data);        
+========
+        //console.log('getAllUsers',data);
+        
+>>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8:src/components/user/UserList.jsx
+        await setUsers(data);
+    }
+
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
     useEffect( ()=>{
         getRoles();
         getAllUsers();
@@ -89,20 +110,35 @@ const UserList = ({frontend,backend}) =>{
         .then(response => response.json())
         .then(data => {
             console.log('Respuesta del servidor:', data);
+<<<<<<< HEAD
             
             if( data.affectedRows == 1 ) {
+=======
+            //if( data.affectedRows === 1 ) {}
+            if( data.msg == 1 ) {
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
                 setUsers(users.filter(user => user.Username !== username));            
                 Notificacion("El usuario se eliminó correctamente!","success")
                 return "OK";
             }
             else {
+<<<<<<< HEAD
                 console.error("MySQL Error",data);                
+=======
+                console.error("MySQL Error");
+                //console.log(data);
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
                 Notificacion("No fue posible eliminar el usuario...","error");
                 return data;
             }
         })
         .catch(error => {
+<<<<<<< HEAD
             console.error('API Error',error);            
+=======
+            console.error('API Error');
+            console.log(error);
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
             Notificacion('API Error',"error");
             return error;
         }); 
@@ -117,6 +153,17 @@ const UserList = ({frontend,backend}) =>{
         }]);        
     } 
 
+<<<<<<< HEAD
+=======
+    const getRoles = async () =>{        
+        const response = await fetch(backend+"/api/qa/roles");
+        //console.log(response);
+        const data = await response.json();
+        console.log('getRoles',data);        
+        await setRoles(data);        
+    }
+
+>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
     const headers = ["Usuario", "Nombre Completo","Correo Electrónico","Rol", "Fecha de Creación", "Estado"];
     const headerStyle = {textAlign:"center", fontWeight:"bold"};
     return (

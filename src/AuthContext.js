@@ -44,13 +44,13 @@ export const AuthProvider = ({ children }) => {
   const login = async (data) => {    
     setIsAuthenticated(true);
 
-    console.log('AUTH LOGIN: ', isAuthenticated)
-    console.log('data:', data.username, data.fullname, data.rol_id)    
+    // console.log('AUTH LOGIN: ', isAuthenticated)
+    // console.log('data:', data.username, data.fullname, data.rol_id)    
     
     localStorage.setItem('user', JSON.stringify(data)); // se debe guardar el objeto como JSON
     
     await setUser(data);    
-    console.log('user:',user )
+    // console.log('user:',user )
     
     //navigate("/"); // Redirige a la página protegida después de iniciar sesión
   };

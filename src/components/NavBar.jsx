@@ -23,6 +23,7 @@ const NavBar = () => {
                   <Nav.Link as={NavLink} to="/proyecto">Proyecto</Nav.Link>
                   <Nav.Link as={NavLink} to="/gestion">Gestiones</Nav.Link>
                   <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
+                  <Nav.Link as={NavLink} to="/revision">Revisión</Nav.Link>
                   <Nav.Link as={NavLink} to="/users">Usuarios</Nav.Link>
                   
                   

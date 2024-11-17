@@ -1,8 +1,10 @@
+import "./GestionForm.css";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import "./GestionForm.css";
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 const MSG_NO_PROYNAME="Ingrese el nombre del proyecto";
 const MSG_NO_PO="Seleccione el Product Owner";
@@ -23,8 +25,19 @@ const MSG_NO_FILE="Seleccione un archivo";
 
 // Formulario para ingreso de proyectos
 const GestionForm = ({fronted,backend})=> {
+    const MySwal = withReactContent(Swal);
     const { proy_id } = useParams();
     const navigate = useNavigate();
+
+    const Notificacion = async (msg, icono) => {
+        await Swal.fire({
+            position: "top-end",
+            icon: icono,
+            title: msg,
+            showConfirmButton: false,
+            timer: 3000
+          });
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // BINDINGS
@@ -217,7 +230,7 @@ const GestionForm = ({fronted,backend})=> {
             if( data.affectedRows === 1 ) {
                 console.log('Etapa: API Success'); 
                 //console.log(data);
-                alert("Proyecto guardado correctamente.");
+                Notificacion("Proyecto guardado correctamente.");
                 navigate('/revision'); 
                 return "OK";
             } else {
@@ -574,7 +587,7 @@ const GestionForm = ({fronted,backend})=> {
                 <div className="col-md-12 contenedor">                
                     <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
                     <span style={{width:50+"px"}}></span>
-                <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>
+                    <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>
                 </div>
             </div>
             
