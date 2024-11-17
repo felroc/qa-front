@@ -28,7 +28,7 @@ const CheckList = ({frontend,backend}) => {
             const response = await fetch(backend+"/api/qa/check_list");
             //console.log(response);
             const data = await response.json();
-            // console.log('getCheckList',data);
+            console.log('getCheckList',data);
             setItems(data);
             // return data;
         }
@@ -51,14 +51,14 @@ const CheckList = ({frontend,backend}) => {
     }
     
     const onEdit = (item)=>{
-        setId(item.CheckListId)
+        setId(item.Check_List_Id)
         setItem(item.Item); 
         setActivo(item.Activo)
         // console.log('item',item)
     }
 
     const addPrueba = async (prueba) => {
-        
+        console.log('addPrueba',prueba)
         await fetch(backend+'/api/qa/check_list', {
             method: 'POST',
             headers: {
@@ -68,31 +68,29 @@ const CheckList = ({frontend,backend}) => {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Respuesta del servidor:', data);
-            //if( data.affectedRows === 1 ) {}
-            if( data.msg === prueba.CheckListId ) {
-                console.info('Proyecto: API Success'); 
+            console.log('addPrueba:', data);
+            
+            if( data.affectedRows === 1 ) {
+                //console.info('AddPrueba: API Success'); 
                 //console.log(data);                
-                Notificacion("El usuario se guardó correctamente!","success");                
+                Notificacion("La Prueba se guardó correctamente!","success");
                 return "OK";
             }
             else {
-                console.error("MySQL Error");
-                //console.log(data);
-                Notificacion("MySQL Error: "+data.msg,"error");
+                console.error("MySQL",data);                
+                Notificacion("MySQL: "+data,"error");
                 return data;
             }
         })
         .catch(error => {
-            console.error('API Error',"error");
-            console.log(error);
-            Notificacion('API Error',"error");
+            console.error('API Error',error);            
+            Notificacion('API '+error,"error");
             return error;
         });
     }
 
     const updatePrueba = async (prueba) => {
-
+        console.log('updatePrueba',prueba)
         await fetch(backend+'/api/qa/check_list', {
             method: 'PUT',
             headers: {
@@ -102,37 +100,34 @@ const CheckList = ({frontend,backend}) => {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Respuesta del servidor:', data);
-            //if( data.affectedRows === 1 ) {}
-            if( data.msg === prueba.CheckListId ) {
-                console.info('Proyecto: API Success'); 
-                //console.log(data);                
-                // Notificacion("El usuario se guardó correctamente!","success");                
+            console.log('updatePrueba:', data);            
+            if( data.affectedRows === 1 ) {
+                //console.info('updatePrueba: API Success',data); 
+                Notificacion("La Prueba se actualizó correctamente!","success");
                 return "OK";
             }
             else {
-                console.error("MySQL Error");
-                //console.log(data);
-                Notificacion("MySQL Error: "+data.msg,"error");
+                console.error("MySQL", data);                
+                Notificacion("MySQL "+data,"error");
                 return data;
             }
         })
         .catch(error => {
-            console.error('API Error',"error");
-            console.log(error);
-            Notificacion('API Error',"error");
+            console.error('API',error);            
+            Notificacion('API '+error,"error");
             return error;
         });
     }
 
-    const savePrueba = () => {
+    const savePrueba =async () => {
         const datos = {
             CheckListId : id,
             Item        : item,
-            Activo      : activo
+            Activo      : activo,
+            TipoTestId: 1
         }
 
-        console.log('savePrueba:',datos)
+        // console.log('savePrueba:',datos)
         
         if( activo === ' ') {
             Notificacion('seleccione un estado');
@@ -140,25 +135,21 @@ const CheckList = ({frontend,backend}) => {
         }
         else if( id === 0)
         {
-            addPrueba(datos)
+            await addPrueba(datos)
 
-            setItems([...items,{
-                CheckListId : id,
+            await setItems([...items,{
+                Check_List_Id : id,
                 Item        : item,
                 Activo      : activo,
-                TipoTestId: 1
-            }])
-
-            Notificacion('La Prueba se agregó correctamente.','success');
+                Tipo_Test_Id: 1
+            }])            
         }
         else { // Actualizar    
-            updatePrueba(datos)        
+            await updatePrueba(datos)        
             
-            setItems( items.map( (i) => (
-                i.CheckListId === id ? {...i,Item:item,Activo:activo} : i
+            await setItems( items.map( (i) => (
+                i.Check_List_Id === id ? {...i,Item:item,Activo:activo} : i
             )))
-
-            Notificacion('La Prueba se actualizó correctamente.','success');
         }
 
         // Clear
@@ -170,13 +161,14 @@ const CheckList = ({frontend,backend}) => {
 
     const onSumbit = (e) => {
         e.preventDefault(); // evitar recargar la página web (postback)
+
         savePrueba()
     }
 
     const deleteCheckList = async(item) => {
-        
+        console.log('deleteCheckList',item)
         try{
-            const datos = { CheckListId: item.CheckListId } 
+            const datos = { CheckListId: item.Check_List_Id } 
             const response = await fetch(backend+"/api/qa/check_list", {
                 method: 'DELETE',
                 headers: {
@@ -187,7 +179,7 @@ const CheckList = ({frontend,backend}) => {
             //console.log('onDelete',response);
             //const data = await response.json();
             //console.log('onDelete',data);
-            setItems(items.filter(i => i.CheckListId !== item.CheckListId));            
+            setItems(items.filter(i => i.Check_List_Id !== item.Check_List_Id));            
             Notificacion("La prueba fue eliminada","success")
             //Swal.fire("La prueba fue eliminada.", "", "info");            
         } 
@@ -212,6 +204,7 @@ const CheckList = ({frontend,backend}) => {
             if (result.isConfirmed) {
                 Swal.fire("Saved!", "", "success");
             } else if (result.isDenied) {
+
                 deleteCheckList(item)
                 
             }
@@ -227,7 +220,7 @@ const CheckList = ({frontend,backend}) => {
 
             <div className="col-md-8">
                 <label htmlFor="item" className="form-label">Nombre de la Prueba</label>
-                <input type="text" value={item||''} onChange={onChangeItem} required name="item" className="form-control"/>
+                <input autoComplete="1" type="text" value={item||''} onChange={onChangeItem} required name="item" className="form-control"/>
             </div>
 
             <div className="col-md-4">
@@ -262,13 +255,13 @@ const CheckList = ({frontend,backend}) => {
                         <th >ID</th>
                         <th >Nombre de la Prueba</th>
                         <th >Activo</th>
-                        <th colSpan={2}>&bnsp;</th>
+                        <th colSpan={2}>&nbsp;</th>
                     </tr>
                 </thead>
                 <tbody>
                     {items.map((item, index)=>(                                
                         <tr key={index} >
-                            <td>{item.CheckListId}</td>
+                            <td>{item.Check_List_Id}</td>
                             <td>{item.Item}</td>
                             <td>
                                 <span className="label-control">{item.Activo==true || item.Activo == 1 ? 'Activo' : 'Inactivo'}</span>

@@ -10,18 +10,19 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import './index.css';
 
 // Componentes
-import App from './App'; //import reportWebVitals from './reportWebVitals';
+//import App from './App'; //import reportWebVitals from './reportWebVitals';
 import NavBar from './components/NavBar';
 import Welcome from './components/Welcome';
 import GestionForm from './components/gestion/GestionForm';
 import GestionList from './components/gestion/GestionList';
 import Revision from './components/revision/Revision';
-import Login from './components/Login/Login';
+import LoginForm from './components/Login/LoginForm';
 import UserList from './components/user/UserList';
 import TaskTable from './components/task/TaskTable';
 import UserForm from './components/user/UserForm'; 
 import Dashboard from './components/dashboard/dashboard';
 import LogOut from './components/Login/Logout';
+import CheckList from './components/CheckList/CheckList'
 
 const frontend = "localhost:3000"; // URL del fronted
 const backend = "http://localhost:8081"; // URL del backend
@@ -31,28 +32,12 @@ root.render(
   <BrowserRouter>
     {/* <React.StrictMode > */}      
       <div className='container my-3'>
-{/* <<<<<<< HEAD
-        <Routes>
-          <Route path='/' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
-          <Route path='/dashboard' element={<h1>Dashboard</h1>} ></Route>          
-          <Route path='/proyecto' element={<GestionForm frontend={frontend} backend={backend}/>}></Route>
-          <Route path='/gestion' element={<GestionList frontend={frontend} backend={backend}/>}></Route>
-          <Route path='/revision' element={<Revision backend={backend}/>}></Route>
-          <Route path='/revision/:proy_id' element={<Revision backend={backend}/>}></Route>
-          <Route path='/users' element={<UserList frontend={frontend} backend={backend}></UserList>}></Route>
-          <Route path='/users/new' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
-          <Route path='/users/view/:username' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
-          <Route path='/users/edit/:username' element={<UserForm frontend={frontend} backend={backend}></UserForm>}></Route>
-          <Route path='/task' element={<TaskTable></TaskTable>}></Route>
-          <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
-        </Routes>
-======= */}
         <AuthProvider>
           <NavBar ></NavBar>
           <Routes>
             
             <Route path='/' element={<Welcome></Welcome>}></Route>
-            <Route path='/login' element={<Login frontend={frontend}></Login>}></Route>
+            <Route path='/login' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
 
             <Route path='/dashboard' element={
                <ProtectedRoute>
@@ -63,13 +48,13 @@ root.render(
 
             <Route path='/proyecto' element={
               <ProtectedRoute>
-              <GestionForm frontend={frontend} backend={backend}/>
+                <GestionForm frontend={frontend} backend={backend}/>
               </ProtectedRoute>
               }>
             </Route>
             <Route path='/proyecto/:id' element={
               <ProtectedRoute>
-              <GestionForm frontend={frontend} backend={backend}/>
+                <GestionForm frontend={frontend} backend={backend}/>
               </ProtectedRoute>
               }>
             </Route>
@@ -81,41 +66,52 @@ root.render(
               }>                
             </Route>
           
+            <Route path='/revision' element={
+              <ProtectedRoute>
+                <Revision backend={backend}/>
+              </ProtectedRoute>
+              }>                
+            </Route>
+
             <Route path='/revision/:proy_id' element={
               <ProtectedRoute>
-              <Revision backend={backend}/>
+                <Revision backend={backend}/>
               </ProtectedRoute>
               }>                
             </Route>
 
             <Route path='/users' element={
               <ProtectedRoute>
-              <UserList frontend={frontend} backend={backend}></UserList>
+                <UserList frontend={frontend} backend={backend}></UserList>
               </ProtectedRoute>
               }>                
             </Route>
 
             <Route path='/users/new' element={
               <ProtectedRoute>
-              <UserForm frontend={frontend} backend={backend}></UserForm>
+                <UserForm frontend={frontend} backend={backend}></UserForm>
               </ProtectedRoute>
               }>                
             </Route>
 
             <Route path='/users/view/:username' element={
               <ProtectedRoute>
-              <UserForm frontend={frontend} backend={backend}></UserForm>
+                <UserForm frontend={frontend} backend={backend}></UserForm>
               </ProtectedRoute>
               }>                
             </Route>
 
             <Route path='/users/edit/:username' element={
               <ProtectedRoute>
-              <UserForm frontend={frontend} backend={backend}></UserForm>
+                <UserForm frontend={frontend} backend={backend}></UserForm>
               </ProtectedRoute>
               }>                
             </Route> 
-
+            <Route path='/checklist' element={
+              <ProtectedRoute>
+                <CheckList frontend={frontend} backend={backend}></CheckList>
+              </ProtectedRoute>
+            }></Route>
             <Route path='/task' element={<TaskTable></TaskTable>}></Route>
             <Route path='/logout' element={<LogOut></LogOut>}></Route>
             <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>

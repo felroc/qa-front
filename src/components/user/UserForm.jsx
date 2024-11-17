@@ -9,11 +9,11 @@ const MSG_NO_FULLNAME = "Ingrese el nombre completo";
 const MSG_NO_EMAIL = "Ingrese el correo electrónico";
 const MSG_NO_PWD = "Ingrese la contraseña";
 
-const UserForm = ({frontend,backend,addNewUser}) => {
-    const isNew = window.location.pathname.includes('/new/') ;
-    const isReadOnly = window.location.pathname.includes('/view/') ? "isReadOnly":"";
-    const showTag = window.location.pathname.includes('/view/') ? "none" : "flex";
-    const showTag2 = window.location.pathname.includes('/view/') ? "none" : "block";
+const UserForm = ({frontend,backend}) => {
+    const isNew         = window.location.pathname.includes('users/new')  ? 1 : 0;
+    const isReadOnly    = window.location.pathname.includes('/view/') ? "isReadOnly":"";
+    const showTag       = window.location.pathname.includes('/view/') ? "none" : "flex";
+    const showTag2      = window.location.pathname.includes('/view/') ? "none" : "block";
 
     const { username } = useParams();
     const navigate = useNavigate();
@@ -25,7 +25,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
             icon: icono,
             title: msg,
             showConfirmButton: false,
-            timer: 3000
+            timer: 5000
           });
     }
 
@@ -45,8 +45,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
         const response = await fetch(backend+"/api/qa/roles");
         //console.log(response);
         const data = await response.json();
-        console.log(data);
-        //setEstados(data.filter(estado => estado.Etapa_Id === null)); etapa_id is null para todas las etapas 
+        // console.log(data);        
         await setRoles(data);
         //await setRol_id(data[0]); // se toma el primer valor del combo box
     }
@@ -70,7 +69,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
     }
 
     // Evento Page Load
-    useEffect( ()=>{
+    useEffect( ()=>{        
         inputName.current.focus();
         getRoles();
         getUser(username)
@@ -78,7 +77,9 @@ const UserForm = ({frontend,backend,addNewUser}) => {
 
     
     const onChangeUserName = (e)=>{
-        setUserName(e.target.value);
+        if( isNew ) {
+            setUserName(e.target.value);
+        }
     }
     const onChangeFullName = (e)=>{
         setFullName(e.target.value);
@@ -117,9 +118,55 @@ const UserForm = ({frontend,backend,addNewUser}) => {
             return 
         }
         else {
-            createNewUser(true);
+            console.log('isNew',isNew)
+            console.log('username',username)
+            if( isNew )
+                createNewUser(true);
+            else
+                updateUser();
         }
     }
+    const updateUser = async()=>{
+    
+        const datos = {            
+            userName,
+            fullName,
+            email,
+            estado: 'Activo',
+            rol_id: rol_id,
+            pwd,
+        }
+        
+        await fetch(backend+'/api/qa/user', {
+            method: 'PUT',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('updateUser:', data);
+            
+            if( data == 1 ) {
+                //console.info('Proyecto: API Success');                                         
+                Notificacion("El usuario se guardó correctamente!","success");
+                navigate('/users');
+                return "OK";
+            }
+            else {
+                console.error("MySQL:",data);
+                //console.log(data);
+                Notificacion("MySQL "+data,"error");
+                return data;
+            }
+        })
+        .catch(error => {
+            console.error('URL Error',error);            
+            Notificacion("URL"+error,"error");
+            return error;
+        });        
+    };
 
     const createNewUser = async(valid)=>{
         if( valid ) {
@@ -142,27 +189,24 @@ const UserForm = ({frontend,backend,addNewUser}) => {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Respuesta del servidor:', data);
-                //if( data.affectedRows === 1 ) {}
+                console.log('createNewUser:', data);
+                
                 if( data.affectedRows == 1 ) {
-                    console.info('Proyecto: API Success'); 
-                    //console.log(data);
-                    if( addNewUser!=undefined) addNewUser(datos);
+                    //console.info('Proyecto: API Success');                                         
                     Notificacion("El usuario se guardó correctamente!","success");
                     navigate('/users');
                     return "OK";
                 }
                 else {
-                    console.error("MySQL Error:",data);
+                    console.error("MySQL createNewUser:",data);
                     //console.log(data);
-                    Notificacion(data.msg,"error");
+                    Notificacion("MySQL "+data,"error");
                     return data;
                 }
             })
             .catch(error => {
-                console.error('API Error',"error");
-                console.log(error);
-                Notificacion('API Error',"error");
+                console.error('API createNewUser',error);                
+                Notificacion('API'+error,"error");
                 return error;
             });
         }
@@ -178,7 +222,7 @@ const UserForm = ({frontend,backend,addNewUser}) => {
             <div className="row mt-3"  >
                 <div className="col-md-6">
                     <label htmlFor="username" className="form-label">Usuario</label>
-                    <input readOnly={isReadOnly} type="text" value={userName||''} onChange={onChangeUserName} name="username" className="form-control" required={true}/>
+                    <input disabled={!isNew} readOnly={isReadOnly} type="text" value={userName||''} onChange={onChangeUserName} name="username" className="form-control" required={true}/>
                 </div>
            
             </div>
@@ -188,12 +232,12 @@ const UserForm = ({frontend,backend,addNewUser}) => {
 
                 <div className="col-md-6">
                     <label htmlFor="fullname" className="form-label">Nombre Completo</label>
-                    <input readOnly={isReadOnly} type="text"value={fullName||''} onChange={onChangeFullName} name="fullname" className="form-control" required={true} ref={inputName} />
+                    <input disabled={isReadOnly} readOnly={isReadOnly} type="text"value={fullName||''} onChange={onChangeFullName} name="fullname" className="form-control" required={true} ref={inputName} />
                 </div>
                 
                 <div className="col-md-6">
                     <label htmlFor="email" className="form-label">Correo electrónico</label>
-                    <input readOnly={isReadOnly}  type="text" value={email||''} onChange={onChangeEmail} name="email" className="form-control" required={true}/>
+                    <input disabled={isReadOnly} readOnly={isReadOnly}  type="text" value={email||''} onChange={onChangeEmail} name="email" className="form-control" required={true}/>
                 </div>
             </div>
             

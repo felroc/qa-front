@@ -14,18 +14,18 @@ const Dashboard = ({frontend,backend}) => {
         try {
             const response = await fetch(backend+"/api/qa/dashboard");
             const data = await response.json();
-            console.log('getDashboard: ',data);
+            // console.log('getDashboard: ',data);
             
             // await setTbl(data);
             // console.log('tbl: ',tbl);
 
             const lst = await data.map((dato)=> dato.cantidad)
             await setDatos(lst)
-            console.log('lst: ',lst);
+            // console.log('lst: ',lst);
 
             const lbl = await data.map((dato)=> dato.estado)
             await setLabels(lbl)
-            console.log('lbl: ',lbl);
+            // console.log('lbl: ',lbl);
 
             return lst;
         }

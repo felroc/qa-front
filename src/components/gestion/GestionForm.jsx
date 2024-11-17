@@ -29,7 +29,7 @@ const GestionForm = ({fronted,backend})=> {
     const { proy_id } = useParams();
     const navigate = useNavigate();
 
-    const Notificacion = async (msg, icono) => {
+    const Notificacion = async (msg, icono='success') => {
         await Swal.fire({
             position: "top-end",
             icon: icono,
@@ -54,7 +54,8 @@ const GestionForm = ({fronted,backend})=> {
     const [devs, setDevs] = useState([]);
     const [testers, setTesters] = useState([]);
 
-    // Hook UseState para campos de tabla Proyecto    
+    // Hook UseState para campos de tabla Proyecto   
+    const [proyectId,setProyectoId] = useState(0)
     const [proyName, setProyName] = useState("");
     const [user, setUser] = useState("");
     const [created, setCreated] = useState("");
@@ -122,45 +123,43 @@ const GestionForm = ({fronted,backend})=> {
         const response = await fetch(backend+"/api/qa/catalogos");
         //console.log(response);
         const data = await response.json();
-        console.log(data);
+        //console.log('getCatalogos',data);
         await setCatalogos(data); // Se solicita el catalogo 1 unica vez y se filtra
+
         await setServers(data.filter(cat => cat.tipo === 'serv'));        
         await setDbs(data.filter(cat => cat.tipo === 'db'));        
         await setAccesos(data.filter(cat => cat.tipo === 'acc'));        
         await setPermisos(data.filter(cat => cat.tipo === 'per'));
-        setServer(servers[0]);
-        setServer(dbs[0]);
-        setServer(accesos[0]);
-        setServer(permisos[0]);
+
+        await setServer(data.filter(cat => cat.tipo === 'serv')[0].item);
+        await setDb(data.filter(cat => cat.tipo === 'db')[0].item);
+        await setAcceso(data.filter(cat => cat.tipo === 'acc')[0].item);
+        await setPermiso(data.filter(cat => cat.tipo === 'per')[0].item);
     }
 
     // Evento Page Load 
     useEffect( ()=> {        
         console.log("Cargando gestion form...",proy_id);
+        const catalogo =  getCatalogos();
         getEstados();
         getUsuarios();
-        //setTasks([...tasks,{id:tasks.length+1,name:newTaskName,prioridad:1, completado:false}]); 
-        const catalogo =  getCatalogos();
-        // console.log(catalogo)
-        //  setServers([...catalogo]);
-        // setServers(catalogos.filter(cat => cat.tipo === 'serv'));
-        // setDbs(catalogos.filter(cat => cat.tipo === 'db'));
-        // setAccesos(catalogos.filter(cat => cat.tipo === 'acc'));
-        // setPermisos(catalogos.filter(cat => cat.tipo === 'per'));
+        //setTasks([...tasks,{id:tasks.length+1,name:newTaskName,prioridad:1, completado:false}]);         
+        // console.log(catalogo)                
     },[]); // [] requerido para evitar loop infinito
 
 
     // Funcion para agregar un nuevo proyecto a las gestiones
-    const addNewProyecto = async (proyectId) =>{                
+    const addNewProyecto = async () =>{                
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend)
-        const datos = {             
+        const datos = {        
+            proyectId,     
             proyName,
             user,
             created,
             estado 
         };
 
-        console.log(datos);
+        // console.log('addNewProyecto',datos);
 
         await fetch(backend+'/api/qa/proyecto', {
             method: 'POST',
@@ -171,30 +170,29 @@ const GestionForm = ({fronted,backend})=> {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Respuesta del servidor:', data);
-            //if( data.affectedRows === 1 ) {}
-            if( data > 0 ) {
-                console.log('Proyecto: API Success'); 
-                console.log(data);
+            // console.log('addNewProyecto:', data);
+            
+            if( data > 0 ) { // backend envia el id
+                // console.log('Proyecto: API Success',data);                 
                 addNewEtapa(data); // backend envia el id
                 return data; // > 0 : "OK";
             }
             else {
-                console.error("Proyecto: MySQL Error");
-                //console.log(data);
-                return data.info;
+                console.error("MySQL addNewProyecto: ",data);
+                Notificacion("MySQL addNewProyecto: "+data,'error');                
+                return data;
             }
         })
         .catch(error => {
-            console.error('Proyecto: API Error');
-            console.log(error);
+            Notificacion("API addNewProyecto: "+error,'error');            
+            console.error("API addNewProyecto: ",error);
             return error;
         });
     };            
     
     // Funcion para agregar una nueva etapa a un proyecto 
     const addNewEtapa = async (id) =>{     
-        console.log(id) 
+        // console.log(id) 
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
         const datos = {           
             id,  
@@ -214,7 +212,7 @@ const GestionForm = ({fronted,backend})=> {
             fechaFinal: fechaFinal==="" ? 'null' :fechaFinal
         };
                 
-        console.log(datos);
+        // console.log('addNewEtapa',datos);
         
         await fetch(backend+'/api/qa/etapa', {
             method: 'POST',
@@ -228,19 +226,20 @@ const GestionForm = ({fronted,backend})=> {
             console.log('Etapa Response:', data);
             
             if( data.affectedRows === 1 ) {
-                console.log('Etapa: API Success'); 
+                // console.log('Etapa: API Success'); 
                 //console.log(data);
-                Notificacion("Proyecto guardado correctamente.");
-                navigate('/revision'); 
+                Notificacion("Proyecto guardado correctamente.");                 
                 return "OK";
             } else {
-                console.error("Etapa: MySQL Error");
+                console.error("Etapa MySQL",data);
+                Notificacion("Etapa MySQL "+data,"error");
                 //console.log(data.info);
-                return data.info;
+                return data;
             }
         })
         .catch(error => {
-            console.error('Etapa: API Error');
+            console.error('Etapa API',error);
+            Notificacion("API "+error,"error")
             return error;
         });
     }
@@ -252,7 +251,9 @@ const GestionForm = ({fronted,backend})=> {
         }
     }
 
-    const attach = async (filename, field) => {
+    const attach = async (filename, opc) => {
+        //console.log( 'attach: ', filename)
+
         if( filename === null || filename === undefined ) {            
             return MSG_NO_FILE;
         }
@@ -267,8 +268,15 @@ const GestionForm = ({fronted,backend})=> {
             })
             .then(response => {
                 console.log('Attach:', response.data); // devuelve el nombre del archivo con su ID
-                field = response.data; // asigna el campo recibido como parametro
-                return "OK";
+                switch( opc ){
+                    case 1 : setManualTecnico(response.data)
+                    break
+                    case 2 : setManualDeploy(response.data)
+                    break
+                    case 3 : setCronograma(response.data)
+                    break
+                }
+                return response.data;
             })
             .catch(error => {
                 console.error('Attach Error:', error);
@@ -277,99 +285,131 @@ const GestionForm = ({fronted,backend})=> {
         }
     }
 
+    const updateDashboard = async (id, cantidad) =>{        
+        // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
+        const datos = {           
+            id, 
+            cantidad
+        }
+                
+        console.log(datos);
+        
+        await fetch(backend+'/api/qa/dashboard', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('updateDashboard:', data);
+            
+            if( data.affectedRows === 1 ) {
+                //console.log('Etapa: API Success',data);                 
+                return data //"OK";
+            } else {
+                console.error("updateDashboard: MySQL Error");
+                //console.log(data.info);
+                return data.info;
+            }
+        })
+        .catch(error => {
+            console.error('updateDashboard: API Error');
+            return error;
+        });
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTOS
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    // Evento OnSubmit del Form
-    const handlerSubmit =  (e) => {
-        e.preventDefault(); // evitar recargar la página web (postback)
-        // console.log("PO: ",user);
-        // console.log("Estado: ",estado);
-        // console.log("Dev: ",dev);
-        // console.log("Tester: ",tester);
-        console.log("Server: ",server);
-
-        //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-        // Validaciones        
-        //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    const validacion = () =>{
         if( proyName.length === 0){            
             console.log(MSG_NO_PROYNAME);
-            alert(MSG_NO_PROYNAME);
-            return;
+            Notificacion(MSG_NO_PROYNAME,'warning');
+            return false;
         }
         else if( user.length === 0){            
             console.log(MSG_NO_PO);
-            alert(MSG_NO_PO);
-            return;
+            Notificacion(MSG_NO_PO,'warning');
+            return false;
         }
         else if( created.length === 0){            
             console.log(MSG_NO_DATE);
-            alert(MSG_NO_DATE);
-            return;
+            Notificacion(MSG_NO_DATE,'warning');
+            return false;
         }
         else if( dev.length === 0){
             console.log(MSG_NO_DEV);
-            alert(MSG_NO_DEV);
-            return;
+            Notificacion(MSG_NO_DEV,'warning');
+            return false;
         }       
         else if( tester.length === 0){
             console.log(MSG_NO_TESTER);
-            alert(MSG_NO_TESTER);
-            return;
+            Notificacion(MSG_NO_TESTER,'warning');
+            return false;
         }       
         else if( server.length === 0){
             console.log(MSG_NO_SERV);
-            alert(MSG_NO_SERV);
-            return;
+            Notificacion(MSG_NO_SERV,'warning');
+            return false;
         }
         else if( db.length === 0){
             console.log(MSG_NO_DB);
-            alert(MSG_NO_DB);
-            return;
+            Notificacion(MSG_NO_DB,'warning');
+            return false;
         }
         else if( acceso.length === 0){
             console.log(MSG_NO_ACCESOS);
-            alert(MSG_NO_ACCESOS);
-            return;
+            Notificacion(MSG_NO_ACCESOS,'warning');
+            return false;
         }
         else if( permiso.length === 0){
             console.log(MSG_NO_PERMISOS);
-            alert(MSG_NO_PERMISOS);
-            return;
+            Notificacion(MSG_NO_PERMISOS,'warning');
+            return false;
         }
         else if( fechaInicio.length === 0){
             console.log(MSG_NO_FECHA_INI);
-            alert(MSG_NO_FECHA_INI);
-            return;
+            Notificacion(MSG_NO_FECHA_INI,'warning');
+            return false;
         }
         // else if( fechaFinal.length === 0){
         //     console.log(MSG_NO_FECHA_FIN);
-        //     alert(MSG_NO_FECHA_FIN);
-        //     return;
+        //     Notificacion(MSG_NO_FECHA_FIN,'warning');
+        //     return false;
         // }
-        else {            
-            //console.log(fileManTec);    
-            attach( fileManTec, manualTecnico )
-            //console.log("man tec: " +manualTecnico );
-            if( manualTecnico === null ) {
-                alert("Adjunte el Manual Técnico.");
-                return;
-            }
-            
-            attach( fileManDep, manualDeploy ) 
-            if( manualDeploy === null ) {
-                alert("Adjunte el Manual de Despliegue.");
-                return; 
-            }
+        else if( fileManTec === null ) {                            
+            Notificacion("Adjunte el Manual Técnico.",'warning');
+            return;
+        }
+        else if( fileManDep === null ) {            
+            Notificacion("Adjunte el Manual de Despliegue.",'warning');
+            return; 
+        }
+        else if( fileCrono === null ) {            
+            Notificacion("Adjunte el Cronograma de QA.",'warning');
+            return;
+        }
+        return true;
+    }
 
-            attach( fileCrono, cronograma ) 
-            if( cronograma === null ) {
-                alert("Adjunte el Cronograma de QA.");
-                return;
-            }
+    // Evento OnSubmit del Form
+    const handlerSubmit = async (e) => {
+        e.preventDefault(); // evitar recargar la página web (postback)
+        
+        //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        // Validaciones        
+        //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        if( validacion() ) {            
+
+            console.log('manualTecnico',manualTecnico);   
+            console.log('manualDeploy',manualDeploy);   
+            console.log('cronograma',cronograma);   
 
             createNewGestion(true);
+
+            updateDashboard(1,1) // revision
         }
     }
 
@@ -390,18 +430,22 @@ const GestionForm = ({fronted,backend})=> {
     const onChangeDev = (event) => {
         setDev(event.target.value);        
     };
-    const onChangeManualTecnico = (event)=>{
-        setFileManTec(event.target.files[0]);        
+    const onChangeManualTecnico = async(event)=>{
+        await setFileManTec(event.target.files[0]);        
+        await attach( event.target.files[0] , 1 )         
     }
-    const onChangeManualDeploy = (event)=>{
-        setFileManDep(event.target.files[0]);        
+    const onChangeManualDeploy = async(event)=>{
+        await setFileManDep(event.target.files[0]);         
+        await attach( event.target.files[0] , 2 )        
     }
     
     const onChangeTester = (event) => {
         setTester(event.target.value);        
     };
-    const onChangeCronograma = (event)=>{
-        setFileCrono(event.target.files[0]);        
+    const onChangeCronograma = async(event)=>{
+        await setFileCrono(event.target.files[0]);
+        await attach( event.target.files[0] , 3 )         
+
     }
     const onChangeServer = (event) => {
         setServer(event.target.value);      
@@ -526,13 +570,14 @@ const GestionForm = ({fronted,backend})=> {
             </div>
 
             <hr></hr>
-            <h4>Ambiente de Pruebas</h4>
+            <h4>Recursos para las Pruebas</h4>
 
             <div className="row form-group">
                 
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label htmlFor="server" className="control-label">Servidor</label>                    
                     <select name="server" value={server} onChange={onChangeServer} onClick={onChangeServer} className="form-select" >
+                        <option value=' '></option>
                         {servers.map((item, index)=>(
                             <option key={index} value={item.item}>{item.item}</option>
                         ))}
@@ -542,6 +587,7 @@ const GestionForm = ({fronted,backend})=> {
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label htmlFor="db" className="control-label">Instancia DB</label>                    
                     <select name="db" value={db} onChange={onChangeDb} onClick={onChangeDb} className="form-select" >
+                        <option value=' '></option>
                         {dbs.map((item, index)=>(
                             <option key={index} value={item.item}>{item.item}</option>
                         ))}
@@ -552,7 +598,8 @@ const GestionForm = ({fronted,backend})=> {
             <div className="row form-group">
                 <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
                     <label htmlFor="acceso" className="control-label">Accesos</label>
-                    <select name="acceso" value={db} onChange={onChangeAccesos} onClick={onChangeAccesos} className="form-select" >
+                    <select name="acceso" value={acceso} onChange={onChangeAccesos} onClick={onChangeAccesos} className="form-select" >
+                        <option value=' '></option>
                         {accesos.map((item, index)=>(
                             <option key={index} value={item.item}>{item.item}</option>
                         ))}
@@ -561,7 +608,8 @@ const GestionForm = ({fronted,backend})=> {
 
                 <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
                     <label htmlFor="permiso" className="control-label">Permisos</label>
-                    <select name="permiso" value={db} onChange={onChangePermisos} onClick={onChangePermisos} className="form-select" >
+                    <select name="permiso" value={permiso} onChange={onChangePermisos} onClick={onChangePermisos} className="form-select" >
+                        <option value=' '></option>
                         {permisos.map((item, index)=>(
                             <option key={index} value={item.item}>{item.item}</option>
                         ))}
@@ -587,7 +635,8 @@ const GestionForm = ({fronted,backend})=> {
                 <div className="col-md-12 contenedor">                
                     <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 
                     <span style={{width:50+"px"}}></span>
-                    <button className="btn btn-warning" onClick={() => navigate('/users')} style={{width:150 +'px'}}>Cancelar</button>
+                    <button onClick={() => navigate('/gestion')} type="button" className="btn btn-warning"  style={{width:150 +'px'}}>Cancelar</button>
+                    
                 </div>
             </div>
             

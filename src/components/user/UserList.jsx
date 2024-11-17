@@ -1,21 +1,10 @@
-<<<<<<< HEAD
-//import { getSuggestedQuery } from "@testing-library/react";
-=======
 import "./UserList.css"
-
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
 import { useState, useEffect } from "react";
 import moment from 'moment'; 
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
-<<<<<<< HEAD
-import "./UserList.css"
-=======
-
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
-import UserForm from "./UserForm";
 
 const UserList = ({frontend,backend}) =>{
     
@@ -39,8 +28,8 @@ const UserList = ({frontend,backend}) =>{
         const response = await fetch(backend+"/api/qa/users");
         //console.log(response);
         const data = await response.json();
-<<<<<<< HEAD
-        // console.log(data);        
+
+        //  console.log("getAllUsers",data);        
         await setUsers(data);
     }
 
@@ -48,24 +37,15 @@ const UserList = ({frontend,backend}) =>{
         const response = await fetch(backend+"/api/qa/roles");
         //console.log(response);
         const data = await response.json();
-        // console.log(data);        
-        await setRoles(data);        
-    }
-
-=======
-<<<<<<<< HEAD:src/components/user/List.jsx
-        console.log(data);        
-========
-        //console.log('getAllUsers',data);
+        //  console.log("getRoles:",data);        
+        await setRoles(data);     
         
->>>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8:src/components/user/UserList.jsx
-        await setUsers(data);
+        await getAllUsers();
     }
 
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
     useEffect( ()=>{
         getRoles();
-        getAllUsers();
+        
         
     },[])
 
@@ -110,35 +90,20 @@ const UserList = ({frontend,backend}) =>{
         .then(response => response.json())
         .then(data => {
             console.log('Respuesta del servidor:', data);
-<<<<<<< HEAD
             
             if( data.affectedRows == 1 ) {
-=======
-            //if( data.affectedRows === 1 ) {}
-            if( data.msg == 1 ) {
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
                 setUsers(users.filter(user => user.Username !== username));            
                 Notificacion("El usuario se eliminó correctamente!","success")
                 return "OK";
             }
             else {
-<<<<<<< HEAD
                 console.error("MySQL Error",data);                
-=======
-                console.error("MySQL Error");
-                //console.log(data);
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
                 Notificacion("No fue posible eliminar el usuario...","error");
                 return data;
             }
         })
         .catch(error => {
-<<<<<<< HEAD
             console.error('API Error',error);            
-=======
-            console.error('API Error');
-            console.log(error);
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
             Notificacion('API Error',"error");
             return error;
         }); 
@@ -153,18 +118,13 @@ const UserList = ({frontend,backend}) =>{
         }]);        
     } 
 
-<<<<<<< HEAD
-=======
-    const getRoles = async () =>{        
-        const response = await fetch(backend+"/api/qa/roles");
-        //console.log(response);
-        const data = await response.json();
-        console.log('getRoles',data);        
-        await setRoles(data);        
+    const getRol = async(rol_id) =>{
+         const res = roles.filter( rol=> rol.Rol_Id === rol_id ).Rol_name
+         console.log(res)
+         return res;
     }
 
->>>>>>> 14453c7da094dd3e0defb35898f788eade5526c8
-    const headers = ["Usuario", "Nombre Completo","Correo Electrónico","Rol", "Fecha de Creación", "Estado"];
+    const headers = ["Usuario", "Nombre Completo","Correo Electrónico", "Estado","Rol", "Fecha de Creación"];
     const headerStyle = {textAlign:"center", fontWeight:"bold"};
     return (
     <div>                
@@ -175,7 +135,7 @@ const UserList = ({frontend,backend}) =>{
         <hr></hr>
         <button className="btn btn-success" onClick={()=>{navigate('/users/new')}}>Crear Usuario</button>
         <br></br>
-        <div className="table-responsive">
+        <div className="table-responsive mt-3">
             <table className="table table-striped table-borderedx table-hover table-dark1">
                 <thead>
                     <tr>
@@ -191,7 +151,8 @@ const UserList = ({frontend,backend}) =>{
                         <tr key={index}>
                             <td>{user.Username}</td>                            
                             <td>{user.Fullname}</td>
-                            <td>{user.Email}</td>                            
+                            <td>{user.Email}</td>
+                            <td>{user.Estado}</td>
                             <td>{roles[user.Rol_Id-1].Rol_name}</td>
                             <td>{moment(user.Created).format('DD MMMM YYYY')}</td>
                             <td><button onClick={()=>{onView(user.Username)}} className="btn btn-info btn-dark1">Consultar</button></td>

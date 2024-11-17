@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
-const Login = ({frontend}) => {
+const LoginForm = ({frontend}) => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -21,23 +21,22 @@ const Login = ({frontend}) => {
           });
     }
     
-    const [username, setUser] = useState('');
+    const [username, setUserName] = useState('');
     const [pwd, setPwd] = useState('');
         
-    useEffect(() => {
-        
-        const storedUser = localStorage.getItem('user');
-        // console.log('LoginForm: ',storedUser)
+    useEffect(() => {        
+        const data = localStorage.getItem('user');
+        // console.log('LoginForm: ',data)
 
-        if (storedUser) {
-            // console.log('LoginForm: ',JSON.parse(storedUser).username)
-            setUser(JSON.parse(storedUser).username); 
-            login(JSON.parse(storedUser))
+        if (data) {
+            // console.log('LoginForm: ',JSON.parse(data))
+            setUserName(JSON.parse(data).username); 
+            // login(JSON.parse(data))
         }
     }, []);
     
     const onChangeUser = (event) => {
-        setUser(event.target.value);
+        setUserName(event.target.value);
     };
 
     const onChangePwd = (event) => {
@@ -47,7 +46,9 @@ const Login = ({frontend}) => {
     const onSubmit = async (event) => {
 
         event.preventDefault();  // Se cancela el PostBack
+    }
         
+    const onClick = async () => {
         await axios.get('http://localhost:8081/api/qa/Login/'+username+'/'+pwd)
         .then(response => {
             console.log('API LOGIN:',response.data); // Imprime los datos de la respuesta
@@ -95,7 +96,7 @@ const Login = ({frontend}) => {
 
                 <div className='row mt-3 '>
                     <div className='col-md-6 contenedor'>
-                        <button type="submit" className='btn btn-success' style={{width:"150px"}}>Login</button>
+                        <button onClick={()=>{onClick()}} type="submit" className='btn btn-success' style={{width:"150px"}}>Login</button>
                     </div>
                 </div>
 
@@ -104,4 +105,4 @@ const Login = ({frontend}) => {
     );
 };
 
-export default Login;
+export default LoginForm;

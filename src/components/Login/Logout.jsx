@@ -17,7 +17,7 @@ const LogOut = () => {
             <p>
                 La sesión ha sido cerrada correctamente.
             </p>
-            <hb></hb>
+            <hr></hr>
             <button type="button" onClick={()=>{navigate('/login')}} className='btn btn-primary'>Login</button>
         </>
     )

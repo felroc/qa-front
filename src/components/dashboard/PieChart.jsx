@@ -17,20 +17,20 @@ const PieChart = ({labels,datos}) => {
       data: datos, // [ 10,  55, 5, 10, 15,],
       backgroundColor: [        
         'rgba(54, 162, 235, 0.5)', // Azul
-        'rgba(54, 192, 54, 0.5)', // Verde
-        'rgba(255, 99, 132, 0.5)', // Rojo
-        "rgba(255, 159, 64, 0.5)", // Naranja
         "rgba(153, 102, 255, 0.5)", // Purple
+        "rgba(255, 159, 64, 0.5)", // Naranja             
+        'rgba(54, 192, 54, 0.5)', // Verde   
+        'rgba(255, 99, 132, 0.5)', // Rojo        
         "rgba(255, 206, 86, 0.5)", // Amarillo
       ],
       borderWidth: 1, // apagado
       borderColor: [
         'rgba(54, 162, 235, 1)', // Azul
-        'rgba(54, 192, 54, 1)', // Verde
-        'rgba(255, 99, 132, 1)', // Rojo
-        "rgba(255, 159, 64, 1)", // Naranja
         "rgba(153, 102, 255, 1)", // Purple
-        "rgba(255, 206, 86, 0.5)", // Amarillo
+        "rgba(255, 159, 64, 1)", // Naranja             
+        'rgba(54, 192, 54, 1)', // Verde   
+        'rgba(255, 99, 132, 1)', // Rojo        
+        "rgba(255, 206, 86, 1)", // Amarillo
       ],      
     }]
   }

@@ -6,7 +6,16 @@ import { useNavigate } from "react-router-dom";
 const Welcome = () => {
     const { login } = useAuth();    
     const navigate = useNavigate();
-  
+    const [name,setName]  = useState('')
+
+    useEffect(() => {
+        const data = localStorage.getItem('user');
+        if (data) {
+        // console.log('Welcome: ',JSON.parse(data))    
+        setName(JSON.parse(data).fullname)    
+        }
+    }, []);
+
     // render() {
         return (
         <>
