@@ -2,3 +2,16 @@
 .bg-blue{
     background-color: #e3f2fd;
 }
+
+.navbar-nav, .navbar-brand {
+    font-weight: bold;
+    font-size: 18px;    
+}
+.navbar-nav .active {
+    text-decoration: underline;
+    background-color: lightgray;
+}
+a:hover {
+    text-decoration: underline;
+    background-color: white;
+}

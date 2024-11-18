@@ -23,7 +23,7 @@ const PieChart = ({labels,datos}) => {
         'rgba(255, 99, 132, 0.5)', // Rojo        
         "rgba(255, 206, 86, 0.5)", // Amarillo
       ],
-      borderWidth: 1, // apagado
+      borderWidth: 1, 
       borderColor: [
         'rgba(54, 162, 235, 1)', // Azul
         "rgba(153, 102, 255, 1)", // Purple
@@ -37,9 +37,18 @@ const PieChart = ({labels,datos}) => {
 
   const options = {
     plugins: {
+      // datalabels: {
+      //   formatter: (value, context) => {
+      //     const dataset = context.dataset;
+      //     const total = dataset.data.reduce((acc, val) => acc + val, 0);
+      //     const percentage = Math.round((value / total) * 100) + '%';
+      //     return percentage;
+      //   },
+      //   // color: 'white',
+      // },
       legend: {
-        position: "right", // Coloca las etiquetas debajo de la gráfica
-      },
+        position: "right", // Coloca las etiquetas debajo de la gráfica        
+      },      
     },
     responsive: true,
     maintainAspectRatio: false,
@@ -52,16 +61,18 @@ const PieChart = ({labels,datos}) => {
   };
 
   return (
-    <div>
-      {/* <h2>Gestion de Proyectos</h2> */}
-      <div className="chart-container">
+    
+    // className="chart-container"
+      <div style={{marginLeft:"50px",width:"800px",height:"500px"}} >
         <Chart
           type="pie"
           data={data}
           options={options}
         />
+        <br></br>
+        <p>Indicador de porcentaje de los desarrollos de software </p>        
       </div> 
-    </div>
+    
   );
 }
 

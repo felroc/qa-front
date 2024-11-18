@@ -5,13 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import moment from "moment";
+import { useAuth } from "../../AuthContext";
 
 const MSG_NO_PROYNAME="Ingrese el nombre del proyecto";
 const MSG_NO_PO="Seleccione el Product Owner";
 const MSG_NO_DATE="Seleccione la fecha de creación";
 const MSG_NO_DEV="Seleccione el Developer";
 const MSG_NO_MANTEC="Adjunte el Manual Técnico";
-const MSG_NO_MANDEP="Adjunte el Manual de Despliegue";
+const MSG_NO_MANDEP="Adjunte el Código Fuente";
 const MSG_NO_TESTER="Seleccione el QA Tester";
 const MSG_NO_CRONO="Adjunte el Cronograma de QA";
 //const MSG_NO_AMBIENTE=""; ETAPA
@@ -25,6 +27,7 @@ const MSG_NO_FILE="Seleccione un archivo";
 
 // Formulario para ingreso de proyectos
 const GestionForm = ({fronted,backend})=> {
+    const { user } = useAuth();
     const MySwal = withReactContent(Swal);
     const { proy_id } = useParams();
     const navigate = useNavigate();
@@ -34,7 +37,7 @@ const GestionForm = ({fronted,backend})=> {
             position: "top-end",
             icon: icono,
             title: msg,
-            showConfirmButton: false,
+            showConfirmButton: true,
             timer: 3000
           });
     }
@@ -57,14 +60,14 @@ const GestionForm = ({fronted,backend})=> {
     // Hook UseState para campos de tabla Proyecto   
     const [proyectId,setProyectoId] = useState(0)
     const [proyName, setProyName] = useState("");
-    const [user, setUser] = useState("");
+    const [po, setPO] = useState("");
     const [created, setCreated] = useState("");
     const [estado, setEstado] = useState('');
 
     // Hook UseState para campos de tabla Proy_Etapa
     //const [proyectoId, setProyectoId] = useState(0);    
     const [etapaId, setEtapaId] = useState(1); // Binding a la DB
-    const [etapa, setEtapa] = useState('Desarrollo-QA'); // Debe existir en la DB
+    const [etapa, setEtapa] = useState(''); // Debe existir en la DB
     const [dev, setDev] = useState('');
     const [manualTecnico, setManualTecnico] = useState(''); 
     const [manualDeploy, setManualDeploy] = useState(''); 
@@ -77,7 +80,7 @@ const GestionForm = ({fronted,backend})=> {
     const [server, setServer] = useState("");
     const [fechaInicio, setFechaInico] = useState("");
     const [fechaFinal, setFechaFinal] = useState("");
-    const [revision,setRevision] = useState('1');
+    const [revision,setRevision] = useState('');
     
     // Archivos adjuntos
     const [fileManTec, setFileManTec] = useState(null); 
@@ -90,7 +93,9 @@ const GestionForm = ({fronted,backend})=> {
     const [dbs, setDbs] = useState([]);
     const [accesos, setAccesos] = useState([]);
     const [permisos, setPermisos] = useState([]);    
-
+    
+    const [proy_etapa, setProyEtapa] = useState([]);
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // FUNCIONES
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,12 +106,13 @@ const GestionForm = ({fronted,backend})=> {
         const data = await response.json();
         //console.log(data);
         // Se solicita el catalogo de usuarios 1 unica vez y se filtra
-        setUsers(data.filter(user => user.Rol_Id === 1));
-        setUser(data[0].Fullname); // se toma el primer valor del combo box
-        setDevs(data.filter(user => user.Rol_Id === 2));
-        setDev(data[0].Fullname); // se toma el primer valor del combo box
+        setUsers(data.filter(user => user.Rol_Id === 1));        
+        setDevs(data.filter(user => user.Rol_Id === 2));        
         setTesters(data.filter(user => user.Rol_Id === 3));
-        setTester(data[0].Fullname); // se toma el primer valor del combo box
+
+        // setPO(data[0].Fullname); // se toma el primer valor del combo box
+        // setDev(data[0].Fullname); // se toma el primer valor del combo box
+        // setTester(data[0].Fullname); // se toma el primer valor del combo box
     }
 
     const getEstados = async () =>{        
@@ -116,7 +122,7 @@ const GestionForm = ({fronted,backend})=> {
         //console.log(data);
         //setEstados(data.filter(estado => estado.Etapa_Id === null)); etapa_id is null para todas las etapas 
         setEstados(data);       
-        setEstado(data[0].estado); // se toma el primer valor del combo box
+        // setEstado(data[0].estado); // se toma el primer valor del combo box
     }
 
     const getCatalogos = async () =>{        
@@ -131,20 +137,106 @@ const GestionForm = ({fronted,backend})=> {
         await setAccesos(data.filter(cat => cat.tipo === 'acc'));        
         await setPermisos(data.filter(cat => cat.tipo === 'per'));
 
-        await setServer(data.filter(cat => cat.tipo === 'serv')[0].item);
-        await setDb(data.filter(cat => cat.tipo === 'db')[0].item);
-        await setAcceso(data.filter(cat => cat.tipo === 'acc')[0].item);
-        await setPermiso(data.filter(cat => cat.tipo === 'per')[0].item);
+        // await setServer(data.filter(cat => cat.tipo === 'serv')[0].item);
+        // await setDb(data.filter(cat => cat.tipo === 'db')[0].item);
+        // await setAcceso(data.filter(cat => cat.tipo === 'acc')[0].item);
+        // await setPermiso(data.filter(cat => cat.tipo === 'per')[0].item);
+    }
+
+
+    const getEtapas = async (proyId) => {
+        const response = await fetch(backend+"/api/qa/etapas/");
+        //console.log(response);
+        const data = await response.json();
+        console.log('Etapas: ',data);
+        await setEtapas(data); // all
+        
+        if( proyId ) {
+            await getProyEtapa(proyId,data)        
+        }
+        else {
+            setEtapa(data[0].Etapa)
+            setRevision(1)
+        }
+        return data; // all
+    }
+
+    // Devuelve la ultima proy_etapa
+    const getProyEtapa = async (proyId,etapas) => {
+        const response = await fetch(backend+"/api/qa/proy_etapa/"+proyId);
+        //console.log(response);
+        const data = await response.json();
+        console.log('getProyEtapa: ',data);
+        await setProyEtapa(data[0]);
+
+        await setEtapa( etapas[data[0].Etapa_Id-1].Etapa )
+        
+        await getRevision(proyId,data[0].Etapa_Id)
+
+        await setDev(data[0].Dev)
+        await setManualTecnico(data[0].Manual_Tecnico)
+        await setManualDeploy(data[0].Manual_Despliegue)
+        await setCronograma(data[0].Cronograma)
+        await setTester(data[0].QA_Tester)
+        
+
+        await setServer(data[0].Server_Name);
+        await setDb(data[0].Instancia_DB);
+        await setAcceso(data[0].Accesso);
+        await setPermiso(data[0].Permisos);
+        return data[0];
+    }
+
+    // Devuelve la ultima revision
+    const getRevision = async (proyId,etapaId) => {
+        // console.log('getRevision...',proyId,etapaId)
+        const response = await fetch(backend+"/api/qa/revision/"+proyId+"/"+etapaId);
+        //console.log(response);
+        const data = await response.json();
+        console.log('getRevision: ',data[0]);
+        await setRevision(data[0].Revision_Id);
+        return data[0];
+    }
+
+    const getProyecto = async (proyId) =>{    
+
+        if( proyId ) {
+            const response = await fetch(backend+'/api/qa/proyecto/'+proyId)
+            //console.log(response);
+            const data = await response.json();
+            console.log('getProyecto: ',data[0]);
+            await setProyectoId(data[0].Proyecto_Id)
+            await setProyName(data[0].Nombre);
+            await setEstado(data[0].Estado);
+            await setPO(data[0].User_Create)
+            return data[0];
+        }
     }
 
     // Evento Page Load 
-    useEffect( ()=> {        
+    useEffect( ()=> {
         console.log("Cargando gestion form...",proy_id);
-        const catalogo =  getCatalogos();
+        getEtapas(proy_id)
+        getProyecto(proy_id)
+
+        setCreated( moment(new Date()).format('YYYY-MM-DD'))
+        setFechaInico( moment(new Date()).format('YYYY-MM-DD'))
+        setFechaFinal( moment(new Date()).add(7,"days").format('YYYY-MM-DD'))
+        
+        getCatalogos();
         getEstados();
         getUsuarios();
+
+        if( user.rol_id == 2  )
+        {
+            if( proy_id > 0 ) Notificacion("Solo puede adjuntar archivos...",'info')
+            else 
+            Notificacion("No tiene autorización crear proyectos...",'error')
+        }            
+        
         //setTasks([...tasks,{id:tasks.length+1,name:newTaskName,prioridad:1, completado:false}]);         
-        // console.log(catalogo)                
+        // console.log(catalogo)     
+        
     },[]); // [] requerido para evitar loop infinito
 
 
@@ -154,7 +246,7 @@ const GestionForm = ({fronted,backend})=> {
         const datos = {        
             proyectId,     
             proyName,
-            user,
+            user: po,
             created,
             estado 
         };
@@ -173,8 +265,9 @@ const GestionForm = ({fronted,backend})=> {
             // console.log('addNewProyecto:', data);
             
             if( data > 0 ) { // backend envia el id
+                setProyectoId(data)
                 // console.log('Proyecto: API Success',data);                 
-                addNewEtapa(data); // backend envia el id
+                addUpdateEtapa(data); // backend envia el id
                 return data; // > 0 : "OK";
             }
             else {
@@ -191,12 +284,13 @@ const GestionForm = ({fronted,backend})=> {
     };            
     
     // Funcion para agregar una nueva etapa a un proyecto 
-    const addNewEtapa = async (id) =>{     
-        // console.log(id) 
+    const addUpdateEtapa = async (id) =>{     
+        console.log(id) 
+        setProyectoId(id)
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
         const datos = {           
-            id,  
-            etapaId, // default 1
+            id      ,  
+            etapaId,
             estado: 'En Proceso',
             dev,
             tester,
@@ -212,7 +306,7 @@ const GestionForm = ({fronted,backend})=> {
             fechaFinal: fechaFinal==="" ? 'null' :fechaFinal
         };
                 
-        // console.log('addNewEtapa',datos);
+        console.log('addUpdateEtapa',datos);
         
         await fetch(backend+'/api/qa/etapa', {
             method: 'POST',
@@ -223,7 +317,7 @@ const GestionForm = ({fronted,backend})=> {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Etapa Response:', data);
+            console.log('addUpdateEtapa Response:', data);
             
             if( data.affectedRows === 1 ) {
                 // console.log('Etapa: API Success'); 
@@ -231,22 +325,22 @@ const GestionForm = ({fronted,backend})=> {
                 Notificacion("Proyecto guardado correctamente.");                 
                 return "OK";
             } else {
-                console.error("Etapa MySQL",data);
-                Notificacion("Etapa MySQL "+data,"error");
-                //console.log(data.info);
+                console.error("addUpdateEtapa MySQL",data);
+                //Notificacion("MySQL "+data,"error");
+                console.log('addUpdateEtapa MySQL',data);
                 return data;
             }
         })
         .catch(error => {
-            console.error('Etapa API',error);
-            Notificacion("API "+error,"error")
+            console.error('addUpdateEtapa API',error);
+            //Notificacion("API "+error,"error")
             return error;
         });
     }
     
-    const createNewGestion = async(valid) => {
+    const createNewGestion = (valid) => {
         if( valid === true ) {
-            const id = await addNewProyecto();
+            const id = addNewProyecto();
             console.log("id", id);
         }
     }
@@ -319,6 +413,48 @@ const GestionForm = ({fronted,backend})=> {
             return error;
         });
     }
+
+    const updateProyecto = async () =>{                
+        // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend)
+        const datos = {        
+            proy_id: proyectId,
+            proyName,
+            user: po,
+            created,
+            estado 
+        };
+
+         console.log('updateProyecto',datos);
+
+        await fetch(backend+'/api/qa/proyecto', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datos),
+        })
+        .then(response => response.json())
+        .then(data => {
+             console.log('updateProyecto affectedRows:', data.affectedRows);
+            
+            if( data.affectedRows == 1 ) { // backend envia el id
+                // console.log('Proyecto: API Success',data);                 
+                addUpdateEtapa(proy_id); // backend envia el id
+                return data; // > 0 : "OK";
+            }
+            else {
+                console.error("MySQL updateProyecto: ",data);
+                Notificacion("MySQL updateProyecto: "+data,'error');                
+                return data;
+            }
+        })
+        .catch(error => {
+            Notificacion("API updateProyecto: "+error,'error');            
+            console.error("API updateProyecto: ",error);
+            return error;
+        });
+    };
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // EVENTOS
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,7 +465,7 @@ const GestionForm = ({fronted,backend})=> {
             Notificacion(MSG_NO_PROYNAME,'warning');
             return false;
         }
-        else if( user.length === 0){            
+        else if( po.length === 0){            
             console.log(MSG_NO_PO);
             Notificacion(MSG_NO_PO,'warning');
             return false;
@@ -379,16 +515,16 @@ const GestionForm = ({fronted,backend})=> {
         //     Notificacion(MSG_NO_FECHA_FIN,'warning');
         //     return false;
         // }
-        else if( fileManTec === null ) {                            
-            Notificacion("Adjunte el Manual Técnico.",'warning');
+        else if( revision && revision.Revision_Id>0 && fileManTec === null ) {                            
+            Notificacion(MSG_NO_MANTEC,'warning');
             return;
         }
-        else if( fileManDep === null ) {            
-            Notificacion("Adjunte el Manual de Despliegue.",'warning');
+        else if( revision  && revision.Revision_Id>0 && fileManDep === null ) {            
+            Notificacion(MSG_NO_MANDEP,'warning');
             return; 
         }
-        else if( fileCrono === null ) {            
-            Notificacion("Adjunte el Cronograma de QA.",'warning');
+        else if( revision && revision.Revision_Id>0 && fileCrono === null ) {            
+            Notificacion(MSG_NO_CRONO,'warning');
             return;
         }
         return true;
@@ -403,13 +539,21 @@ const GestionForm = ({fronted,backend})=> {
         //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         if( validacion() ) {            
 
-            console.log('manualTecnico',manualTecnico);   
-            console.log('manualDeploy',manualDeploy);   
-            console.log('cronograma',cronograma);   
+            // console.log('manualTecnico',manualTecnico);   
+            // console.log('manualDeploy',manualDeploy);   
+            // console.log('cronograma',cronograma); 
+            console.log('proyectId: ',proyectId)  
+            console.log('proy_etapa: ',proy_etapa)  
 
-            createNewGestion(true);
+            if( proyectId==0 ) //&& proy_etapa.Etapa_Id == 1 
+            {
+                createNewGestion(true);
 
-            updateDashboard(1,1) // revision
+                updateDashboard(1,1) // revision
+            }
+            else {
+                updateProyecto()
+            }
         }
     }
 
@@ -421,7 +565,7 @@ const GestionForm = ({fronted,backend})=> {
         setCreated(e.target.value);        
     }
     const onChangeUser = (e)=>{        
-        setUser(e.target.value);        
+        setPO(e.target.value);        
     }    
     const onChangeEstado = (event) => { 
         setEstado(event.target.value);        
@@ -471,20 +615,30 @@ const GestionForm = ({fronted,backend})=> {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
         <div>
-        <form onSubmit={handlerSubmit} className="mb-3">        
-            <h1>Gestión y Control de Calidad</h1>
-            <hr></hr>
+        <form onSubmit={handlerSubmit} className="mb-3">  
             
             <div className="row mt-3">
+                <div className="col-md-8">
+                    <h1>Proyecto</h1>
+                </div>
+                <div className="col-md-4 mt-2" style={{textAlign:"right"}}>
+                    <h2>Correlativo: {proyectId}</h2>
+                </div>
+            </div>      
+            
+            <hr></hr>
+            
+            <div className="row mt-3" style={{display: user.rol_id == 2 ? 'none': 'flex' }}>
 
-                <div className="col-md-3">
+                <div className="col-md-4">
                     <label htmlFor="proyName" className="form-label">Nombre del proyecto</label>
-                    <input type="text" value={proyName} onChange={onChangeProyName} name="proyName" className="form-control"/>
+                    <input value={proyName} type="text" onChange={onChangeProyName} name="proyName" className="form-control"/>
                 </div>
 
-                <div className="col-md-3">
+                <div className="col-md-4">
                     <label htmlFor="" className="form-label">Producto Owner</label> 
-                    <select name="user" value={user} onChange={onChangeUser} onClick={onChangeUser} className="form-select" >
+                    <select name="po" value={po} onChange={onChangeUser} onClick={onChangeUser} className="form-select" >
+                        <option value=' '></option>
                         {users.map((item, index)=>(
                             <option key={index} value={item.Fullname}>{item.Fullname}</option>
                         ))}                           
@@ -492,37 +646,37 @@ const GestionForm = ({fronted,backend})=> {
                 </div> 
 
                 <div className="col-md-3">
+                    <label htmlFor="" className="form-label">Fecha de creación</label>
+                    <input type="date" value={created} onChange={onChangeCreated} onClick={onChangeCreated} name="created" className="form-control"/>
+                </div>       
+
+            </div>
+
+            <div className="row mt-3" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
+
+                <div className="col-md-4">
                     <label htmlFor="" className="form-label">Estado de Proyecto</label>                         
                     <select name="estado" value={estado} onChange={onChangeEstado} onClick={onChangeEstado} className="form-select" >
+                        <option value=' '></option>
                         {estados.map((item, index)=>(
                             <option key={index} value={item.estado}>{item.estado}</option>
                         ))}                           
                     </select>
-                </div> 
-
-                <div className="col-md-3">
-                    <label htmlFor="" className="form-label">Fecha de creación</label>
-                    <input type="date" value={created} onChange={onChangeCreated} onClick={onChangeCreated} name="created" className="form-control"/>
-                </div>                
-            </div>
-            
-            <hr></hr>
-
-            <div className="row form-group">
-                <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                </div>          
+                
+                <div className="col-md-4 mt-2">
                     <label className="control-label">Etapa</label>
-                    <p>{etapa}</p>
-                    {/* <input type="text" name="etapa" className="form-control" value={etapa} readOnly={true} /> */}
+                    <input value={etapa} type="text" name="etapa" className="form-control" readOnly={true} />
                 </div>
 
-                <div className="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-                    <label htmlFor="revision" className="control-label">Revisión</label>
-                    <p>{revision}</p>
-                    {/* <input type="text" name="revision" value={revision} readOnly={true} className="form-control right" /> */}
+                <div className="col-lg-3 col-md-3 col-sm-6 col-xs-12 mt-2">
+                    <label htmlFor="revision" className="control-label">Revisión</label>                    
+                    <input value={revision}  type="text" name="revision" readOnly={true} className="form-control right" />
                 </div>
 
             </div>
             
+            <br className="mt-3z"></br>
             <hr></hr>
             <h4>Datos del Developer</h4>
             
@@ -531,6 +685,7 @@ const GestionForm = ({fronted,backend})=> {
                 <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                     <label htmlFor="dev" className="control-label">Developer</label>
                     <select name="dev" value={dev} onChange={onChangeDev} onClick={onChangeDev} className="form-select" >
+                        <option value=' '></option>
                         {devs.map((item, index)=>(
                             <option key={index} value={item.Fullname}>{item.Fullname}</option>
                         ))}
@@ -539,40 +694,46 @@ const GestionForm = ({fronted,backend})=> {
 
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Manual Técnico</label>
-                    <input type="file" name="manualTecnico" onChange={onChangeManualTecnico} className="form-control" id="manualTec"/>
+                    <input  type="file" name="manualTecnico" onChange={onChangeManualTecnico} className="form-control" id="manualTec"/>
+                    {/* value={manualTecnico} no works */}
                 </div>
                 
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                    <label className="control-label">Manual de Despliegue</label>
-                    <input type="file" name="manualDespliegue" onChange={onChangeManualDeploy} className="form-control" />
+                    <label className="control-label">Código Fuente</label>
+                    <input  type="file" name="manualDespliegue" onChange={onChangeManualDeploy} className="form-control" />
+                    {/* value={manualDeploy} no works */}
                 </div>
 
             </div>
 
+            <br className="mt-3z"></br>
             <hr></hr>
             <h4>Datos del QA Tester</h4>
 
-            <div className="row form-group">
+            <div className="row form-group" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
                 
-                <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                <div className="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                     <label htmlFor="tester" className="control-label">QA Tester</label>
                     <select name="tester" value={tester} onChange={onChangeTester} onClick={onChangeTester} className="form-select" >
+                        <option value=' '></option>
                         {testers.map((item, index)=>(
                             <option key={index} value={item.Fullname}>{item.Fullname}</option>
                         ))}
                     </select>   
                 </div>
 
-                <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
+                <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Cronograma</label>
-                    <input type="file" name="cronograma" onChange={onChangeCronograma} className="form-control" />
+                    <input  type="file" name="cronograma" onChange={onChangeCronograma} className="form-control" />
+                    {/* value={cronograma} no works */}
                 </div>
             </div>
 
-            <hr></hr>
+            <br className="mt-3z"></br>
+            <hr ></hr>
             <h4>Recursos para las Pruebas</h4>
 
-            <div className="row form-group">
+            <div className="row form-group" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
                 
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label htmlFor="server" className="control-label">Servidor</label>                    
@@ -595,8 +756,8 @@ const GestionForm = ({fronted,backend})=> {
                 </div>
             </div>
                 
-            <div className="row form-group">
-                <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
+            <div className="row mt-3" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
+                <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label htmlFor="acceso" className="control-label">Accesos</label>
                     <select name="acceso" value={acceso} onChange={onChangeAccesos} onClick={onChangeAccesos} className="form-select" >
                         <option value=' '></option>
@@ -606,7 +767,7 @@ const GestionForm = ({fronted,backend})=> {
                     </select>
                 </div>
 
-                <div className="col-lg-4 col-md-3 col-sm-6 col-xs-12">
+                <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label htmlFor="permiso" className="control-label">Permisos</label>
                     <select name="permiso" value={permiso} onChange={onChangePermisos} onClick={onChangePermisos} className="form-select" >
                         <option value=' '></option>
@@ -617,20 +778,20 @@ const GestionForm = ({fronted,backend})=> {
                 </div>
             </div>
 
-            <div className="row form-group">            
+            <div className="row mt-3" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Fecha Inicio</label>
-                    <input type="date" name="fechaInicio" onChange={onChangeFechaIni} onClick={onChangeFechaIni} className="form-control" />
+                    <input value={fechaInicio||''} type="date" name="fechaInicio" onChange={onChangeFechaIni} onClick={onChangeFechaIni} className="form-control" />
                 </div>
           
                 <div className="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Fecha cierre</label>
-                    <input type="date" name="fechaFinal" onChange={onChangeFechaFin} onClick={onChangeFechaFin} className="form-control" />
+                    <input value={fechaFinal||''} type="date" name="fechaFinal" onChange={onChangeFechaFin} onClick={onChangeFechaFin} className="form-control" />
                 </div>
             </div>
             
+            <br className="mt-3z"></br>
             <hr></hr>
-
             <div className="row mt-3">
                 <div className="col-md-12 contenedor">                
                     <button type="submit" className="btn btn-primary" style={{width:150 +'px'}}>Guardar</button> 

@@ -3,9 +3,11 @@ import { useEffect, useState } from "react"
 import moment from 'moment'; 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import { useAuth } from "../../AuthContext";
 
 const CheckList = ({frontend,backend}) => {
-    
+    const { user } = useAuth();
+
     const [items,setItems] = useState([])
     const [id,setId] = useState(0)
     const [item,setItem] = useState('')    
@@ -38,7 +40,11 @@ const CheckList = ({frontend,backend}) => {
     }
 
     useEffect( ()=> {  
-        getCheckList()               
+        if( user.rol_id == 1 || user.rol_id==3){
+            getCheckList()               
+        } else {
+            Notificacion("No tiene autorización para este contenido",'error')
+        }
     },[])
 
 
@@ -216,7 +222,7 @@ const CheckList = ({frontend,backend}) => {
         <h1 className="mt-3">Listado de Pruebas</h1>
         <hr></hr>
 
-        <div className="row form-group mt-3">
+        <div className="row form-group mt-3" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
 
             <div className="col-md-8">
                 <label htmlFor="item" className="form-label">Nombre de la Prueba</label>
@@ -235,7 +241,7 @@ const CheckList = ({frontend,backend}) => {
       
         </div>
 
-        <div className="row mt-3">
+        <div className="row mt-3" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
             <div className="col-md-12 contenedor">       
             <form onSubmit={onSumbit}>         
                 <button type="submit" className="btn btn-primary" style={{width:"150px"}}>Guardar</button> 
@@ -267,10 +273,10 @@ const CheckList = ({frontend,backend}) => {
                                 <span className="label-control">{item.Activo==true || item.Activo == 1 ? 'Activo' : 'Inactivo'}</span>
                             </td>
                             <td>
-                                <button onClick={()=>{onEdit(item)}} type="button" className="btn btn-warning1 btn-dark">Editar</button>
+                                <button onClick={()=>{onEdit(item)}} type="button" className="btn btn-warning btn-darkx">Editar</button>
                             </td>                            
                             <td>
-                                <button onClick={()=>{onDelete(item)}} className="btn btn-info1 btn-dark">Eliminar</button>
+                                <button onClick={()=>{onDelete(item)}} className="btn btn-info btn-darkx">Eliminar</button>
                             </td>
                         </tr>
                     ))}

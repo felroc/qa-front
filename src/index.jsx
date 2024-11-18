@@ -37,7 +37,7 @@ root.render(
           <Routes>
             
             <Route path='/' element={<Welcome></Welcome>}></Route>
-            <Route path='/login' element={<LoginForm frontend={frontend}></LoginForm>}></Route>
+            <Route path='/login' element={<LoginForm frontend={frontend} backend={backend}></LoginForm>}></Route>
 
             <Route path='/dashboard' element={
                <ProtectedRoute>
@@ -52,7 +52,7 @@ root.render(
               </ProtectedRoute>
               }>
             </Route>
-            <Route path='/proyecto/:id' element={
+            <Route path='/proyecto/:proy_id' element={
               <ProtectedRoute>
                 <GestionForm frontend={frontend} backend={backend}/>
               </ProtectedRoute>
@@ -112,7 +112,8 @@ root.render(
                 <CheckList frontend={frontend} backend={backend}></CheckList>
               </ProtectedRoute>
             }></Route>
-            <Route path='/task' element={<TaskTable></TaskTable>}></Route>
+
+            {/* <Route path='/task' element={<TaskTable></TaskTable>}></Route> */}
             <Route path='/logout' element={<LogOut></LogOut>}></Route>
             <Route path='*' element={<h1>Página no encontrada 404.</h1>}></Route>
 

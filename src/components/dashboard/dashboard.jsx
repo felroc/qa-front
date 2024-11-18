@@ -43,23 +43,39 @@ const Dashboard = ({frontend,backend}) => {
     },[])
 
     return (
-        <div>
-            <h1>Gestion de Proyectos</h1>
+        <div className="mt-3">
+            <h1>Dashboard de Métricas</h1>
             <hr></hr>
             <div className="row"> 
 
-                <div className="col-md-4">
+                <div className="col-md-12">
+                <h2>Lineal Chart</h2>
+
                     <LineChart labels={labels} datos={datos}></LineChart>
                 </div>
-
-                <div className="col-md-4">
+                
+                <br></br>
+                <hr></hr>
+                
+                <div className="col-md-12">
+                    <h2>Bar Chart</h2>
                     <BarChart labels={labels} datos={datos}></BarChart>
                 </div>
-               
-                <div className="col-md-4">
-                    <PieChart labels={labels} datos={datos}></PieChart>    
+
+                <br></br>
+                <hr></hr>
+                <br></br>
+
+                <div className="col-md-12">
+                    <h2>Pie Chart</h2>
+                    <PieChart labels={labels} datos={datos}></PieChart>                        
                 </div>
+
             </div>
+            
+            <br></br>                
+            <br></br>                      
+            <hr></hr>
         </div>
     )
 }

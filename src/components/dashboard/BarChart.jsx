@@ -41,17 +41,20 @@ const BarChart = ({labels,datos}) => {
         display: false
       },
       title: {
-        display: false,
-        text: "Gestión de Proyectos",
+        display: true,
+        text: "Cantidad de Proyectos por Estado",
       },
     },
   };
 
   return (
-    <div style={{ width: "400px", margin: "0 auto" }}>
-      {/* <h2>Gráfico de Barras</h2> */}
+    // style={{ width: "100%", margin: "0 auto" }}
+    <div style={{ width: "800px",height:"450px", margin: "50px" }}>
+
       <Bar data={data} options={options} />
-    </div>
+      <br></br>
+      <p>Indicador cuantitatvo de los desarrollo de software en cada estado</p>
+    </div>    
   );
     
   }

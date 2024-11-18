@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
-const LoginForm = ({frontend}) => {
+const LoginForm = ({frontend,backend}) => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -49,7 +49,8 @@ const LoginForm = ({frontend}) => {
     }
         
     const onClick = async () => {
-        await axios.get('http://localhost:8081/api/qa/Login/'+username+'/'+pwd)
+        console.log('url login',backend+'/api/qa/Login/'+username+'/'+pwd)
+        await axios.get(backend+'/api/qa/Login/'+username+'/'+pwd)
         .then(response => {
             console.log('API LOGIN:',response.data); // Imprime los datos de la respuesta
             if( response.data == "NO RECORD!" )

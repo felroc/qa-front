@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import moment from 'moment'; 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import { useAuth } from "../../AuthContext";
 
 const GestionList = ({backend}) => {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [proys, setProys] = useState([]);
 
@@ -20,7 +22,7 @@ const GestionList = ({backend}) => {
     }
 
     const getProys = async () =>{
-        const response = await fetch("http://localhost:8081/api/qa/proyectos");
+        const response = await fetch(backend+"/api/qa/proyectos");
         //console.log(response);
         const data = await response.json();
         //console.log(data);
@@ -35,9 +37,10 @@ const GestionList = ({backend}) => {
     const onRevision = (Proyecto_Id) => {
         navigate("/revision/"+Proyecto_Id)
     }
-    const onDelete = (Proyecto_Id) => {
+    const onDelete = (Proyecto_Id,) => {
         Swal.fire({
-            title: "¿Desea eliminar el proyecto?",
+            timerProgressBar: true, icon:'question',
+            title: "¿Desea eliminar el proyecto "+ Proyecto_Id+" ?",
             showDenyButton: true,
             showConfirmButton: false,
             showCancelButton: true,
@@ -87,12 +90,24 @@ const GestionList = ({backend}) => {
         }); 
     }
 
+    const onView = (Proyecto_Id) => {
+        navigate("/proyecto/"+Proyecto_Id)
+    }
     return (
-        <div>
-            <h1>Gestión de proyectos</h1>
+        <div>            
+
+            <div className="row mt-3">
+                <div className="col-md-10">
+                    <h1>Gestión de proyectos</h1>                
+                </div>
+                <div className="col-md-2 mt-2">
+                    <button onClick={()=>{navigate('/proyecto')}} type="button" className="btn btn-success">Crear Proyecto</button>
+                </div>
+            </div>
+            
             <hr></hr>        
 
-            <div className="table-responsive">
+            <div className="table-responsive mt-3">
                 <table border="1" cellPadding="10" cellSpacing="0" 
                 className="table1 table-striped table-borderedx table-hover table-dark1">
                     <thead>
@@ -115,9 +130,11 @@ const GestionList = ({backend}) => {
                                 <td>{proy.Nombre}</td>
                                 <td>{proy.User_Create}</td>
                                 <td>{proy.Estado}</td>
-                                <td>{moment(proy.Created).format('DD MMMM YYYY')}</td>                                    
-                                <td><button onClick={()=>{onRevision(proy.Proyecto_Id)}} className="btn btn-info">Revision</button></td>
-                                <td><button onClick={()=>{onDelete(proy.Proyecto_Id)}} className="btn btn-danger">Delete</button></td>
+                                {/* vista con Etapa y Revision */}
+                                <td>{moment(proy.Created).format('DD MMMM YYYY')}</td>
+                                <td><button onClick={()=>{onView(proy.Proyecto_Id)}}  className="btn btn-primary">Abrir</button></td>
+                                <td><button onClick={()=>{onRevision(proy.Proyecto_Id)}} className="btn btn-warning">Revision</button></td>
+                                <td><button onClick={()=>{onDelete(proy.Proyecto_Id)}} style={{display: user.rol_id == 2 ?'none': 'flex' }} className="btn btn-danger">Delete</button></td>
                             </tr>
                         ))}
                     </tbody>

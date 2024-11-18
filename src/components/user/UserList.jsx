@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import { useAuth } from "../../AuthContext";
 
 const UserList = ({frontend,backend}) =>{
-    
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     const Notificacion = (msg, icono="success") => {
@@ -44,9 +45,11 @@ const UserList = ({frontend,backend}) =>{
     }
 
     useEffect( ()=>{
-        getRoles();
-        
-        
+        if( user.rol_id == 1 || user.rol_id==3){            
+            getRoles();
+        } else {
+            Notificacion("No tiene autorización para este contenido",'error')
+        }      
     },[])
 
     const onView = (username)=>{
@@ -58,7 +61,8 @@ const UserList = ({frontend,backend}) =>{
 
     const onDelete = async (username) => {
         Swal.fire({
-            title: "¿Desea eliminar el usuario?",
+            title: "¿Desea eliminar el usuario "+username+" ?", 
+            timerProgressBar: true, icon:'question',
             showDenyButton: true,
             showConfirmButton: false,
             showCancelButton: true,
@@ -127,15 +131,15 @@ const UserList = ({frontend,backend}) =>{
     const headers = ["Usuario", "Nombre Completo","Correo Electrónico", "Estado","Rol", "Fecha de Creación"];
     const headerStyle = {textAlign:"center", fontWeight:"bold"};
     return (
-    <div>                
+    <div >
         {/* <UserForm frontend={frontend} backend={backend} addNewUser={addNewUser}></UserForm>
         <hr></hr> */}
         
         <h1>Listado de Usuarios</h1>
         <hr></hr>
-        <button className="btn btn-success" onClick={()=>{navigate('/users/new')}}>Crear Usuario</button>
+        <button className="btn btn-success" onClick={()=>{navigate('/users/new')}} style={{display: user.rol_id == 2 ?'none': 'flex' }}>Crear Usuario</button>
         <br></br>
-        <div className="table-responsive mt-3">
+        <div className="table-responsive mt-3" style={{display: user.rol_id == 2 ?'none': 'flex' }}>
             <table className="table table-striped table-borderedx table-hover table-dark1">
                 <thead>
                     <tr>
@@ -163,6 +167,9 @@ const UserList = ({frontend,backend}) =>{
                 </tbody>
             </table>
         </div>            
+        <div style={{display: user.rol_id == 2 ?'flex': 'none' }}>
+            <h1>NO TIENE AUTORIZACIÓN PARA ESTE CONTENIDO...</h1>
+        </div>
     </div>
     )    
 }

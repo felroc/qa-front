@@ -17,20 +17,24 @@ const  LineChart = ({labels,datos}) => {
       labels: labels, //['En proceso', 'Completados', 'Rechazados', 'Descartados'],
       datasets: [
         {
-            label: 'Proyectos',
+            label: 'Variación de los Estados ',
             data:  datos, // [30, 55, 15, 5],
-            borderColor:      'rgba(54, 162, 235, 0.5)', // Azul
-            backgroundColor:  "rgba(54, 162, 235, 1)",
+            borderColor:      'rgba(54, 162, 235, 0.5)', // Azul            
             borderWidth: 1,
-            fill: true
+            fill: true,
+            backgroundColor:  "rgba(54, 162, 235, 1)",
         }
       ]
     };
   
-    return (
-      <div style={{marginLeft:"05px"}}>
-        {/* <h2>Gráfico de Líneas</h2> */}
-        <Line data={data} style={{width:"600px",height:"300px"}} />
+    return (      
+      // style={{}}
+      <div style={{marginLeft:"50px",width:"800px",height:"500px"}}>
+
+        <Line data={data}  />
+
+        <br></br>
+        <p>Indicador de comportamiente de los estados en el desarrollo de software</p>
       </div>
     );
   }

@@ -8,7 +8,7 @@ import withReactContent from 'sweetalert2-react-content'
 import "./UserList.css"
 import UserForm from "./UserForm";
 
-const UserList = ({frontend,backend}) =>{
+const UserList2 = ({frontend,backend}) =>{
     
     const navigate = useNavigate();
 
@@ -50,6 +50,7 @@ const UserList = ({frontend,backend}) =>{
     const onDelete = async (username) => {
         Swal.fire({
             title: "¿Desea eliminar el usuario?",
+            timerProgressBar: true, icon:'question',
             showDenyButton: true,
             showConfirmButton: false,
             showCancelButton: true,
@@ -161,4 +162,4 @@ const UserList = ({frontend,backend}) =>{
     )    
 }
 
-export default UserList;
+export default UserList2;

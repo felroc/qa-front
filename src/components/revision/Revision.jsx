@@ -5,8 +5,10 @@ import moment from 'moment';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../AuthContext";
 
 const Revision = ({frontend,backend}) => { 
+    const { user } = useAuth();
     const { proy_id } = useParams(); // /revision/:proy_id
     const navigate = useNavigate();
     const [checkList, setCheckList] = useState([]);    
@@ -14,7 +16,7 @@ const Revision = ({frontend,backend}) => {
     const [proyecto, setProyecto] = useState([]);
     const [proy_etapa, setProyEtapa] = useState([]);
     const [etapa, setEtapa] = useState([]);
-    const [etapas, setEtapas] = useState() //([{Etapa_Id: 1, Etapa: "Control de Calidad"},{Etapa_Id: 1, Etapa: "Control de Calidad"}]);
+    const [etapas, setEtapas] = useState() 
     const [revision, setRevision] = useState([]);
     const [detalleRevision, setDetalleRevision] = useState([])
     const [checked,setIsChecked]=useState(false)
@@ -25,33 +27,54 @@ const Revision = ({frontend,backend}) => {
     const MySwal = withReactContent(Swal);
     const Notificacion = async (msg, icono='success') => {
         await Swal.fire({
-            position: "top-end",
-            icon: icono,
+            position: "top-end", 
+            timerProgressBar: true, icon: icono,
             title: msg,
             showConfirmButton: false,
             timer: 5000
           });
     }
+    const Mensaje = async (lbl, icono='warning', func) => {
+        Swal.fire({
+            title: lbl, icon: icono, 
+            showCancelButton: false,
+            showConfirmButton: true,
+            confirmButtonColor: "success",
+            confirmButtonText: "OK",
+            showDenyButton: true,
+            denyButtonText: `Cancel`
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                // Swal.fire("Saved!", "", "success");
+                if(func) func()
+                return true
+            } else if (result.isDenied) {
+                // Swal.fire("Saved!", "", "success");
+                return false
+            }
+        });             
+    }
 
     const getCheckList = async () => {
-        const response = await fetch("http://localhost:8081/api/qa/check_list");
+        const response = await fetch(backend+"/api/qa/check_list");
         //console.log(response);
         const data = await response.json();
         //console.log(data);
-        setCheckList( data.filter(x=>x.Activo==1) );
+        await setCheckList( data.filter(x=>x.Activo==1) );
         //console.log('checkList: ',checkList) no works
     }
     
     const getProyecto = async (proyId) => {
         try {
-        const response = await fetch("http://localhost:8081/api/qa/proyecto/"+proyId);
-        //console.log(response);
-        const data = await response.json();
-        // console.log('getProyecto data',data[0]);        
-        await setProyecto(data); // no works
-        //await setProyecto(data[0]); // no works
-        // console.log('getProyecto: ',data); 
-        return data[0];
+            const response = await fetch(backend+"/api/qa/proyecto/"+proyId);
+            //console.log(response);
+            const data = await response.json();
+            // console.log('getProyecto data',data[0]);        
+            await setProyecto(data); // no works
+            //await setProyecto(data[0]); // no works
+            // console.log('getProyecto: ',data); 
+            return data[0];
         }catch(error){
             console.error('error',error)
         }
@@ -59,16 +82,16 @@ const Revision = ({frontend,backend}) => {
 
     // Devuelve la ultima proy_etapa
     const getProyEtapa = async (proyId) => {
-        const response = await fetch("http://localhost:8081/api/qa/proy_etapa/"+proyId);
+        const response = await fetch(backend+"/api/qa/proy_etapa/"+proyId);
         //console.log(response);
         const data = await response.json();
         // console.log('getProyEtapa: ',data[0]);
-        // setProyEtapa(data);
+        setProyEtapa(data);
         return data[0];
     }
 
     const getEtapas = async (proyId) => {
-        const response = await fetch("http://localhost:8081/api/qa/etapas/");
+        const response = await fetch(backend+"/api/qa/etapas/");
         //console.log(response);
         const data = await response.json();
         // console.log('Etapas: ',data);
@@ -79,7 +102,7 @@ const Revision = ({frontend,backend}) => {
     // Devuelve la ultima revision
     const getRevision = async (proyId,etapaId) => {
         // console.log('getRevision...',proyId,etapaId)
-        const response = await fetch("http://localhost:8081/api/qa/revision/"+proyId+"/"+etapaId);
+        const response = await fetch(backend+"/api/qa/revision/"+proyId+"/"+etapaId);
         //console.log(response);
         const data = await response.json();
         // console.log('getRevision: ',data[0]);
@@ -88,7 +111,7 @@ const Revision = ({frontend,backend}) => {
     }
 
     const getDetalleRev = async (proyId,etapaId,revId) => {
-        const response = await fetch("http://localhost:8081/api/qa/detalle_revision/"+proyId+"/"+etapaId+"/"+revId);
+        const response = await fetch(backend+"/api/qa/detalle_revision/"+proyId+"/"+etapaId+"/"+revId);
         //console.log(response);
         const data = await response.json();
         // console.log('getDetalleRev: ',data);
@@ -98,6 +121,7 @@ const Revision = ({frontend,backend}) => {
     
     // Insert o Update if already exists
     const addUpdateDetalleRevision = async (rev) =>{
+        //console.log('addUpdateDetalleRevision: ',rev)
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend)
         const datos = {             
             Proyecto_Id:    rev.Proyecto_Id,
@@ -124,26 +148,35 @@ const Revision = ({frontend,backend}) => {
                 // console.log('API Success');
                 // No mostrar notificacion
                 setDetalleError(false)
+                return true
             }
             else {
                 Notificacion("MySQL "+data,"error");
-                console.error("MySQL ",data.info);
+                console.error("MySQL addUpdateDetalleRevision",data);
                 setDetalleError(true)
+                return false
             }
             return data;
         })
         .catch(error => {
-            Notificacion("MySQL "+error,"error");
+            Notificacion("API "+error,"error");
             setDetalleError(true)
-            console.error('addUpdateDetalleRevision API Error: ',error);            
+            console.error('addUpdateDetalleRevision API: ',error);            
             return error;
         });
     };      
     
     // Evento Page Load
-    useEffect( () => {        
-        getCheckList();
-        load(proy_id);        
+    useEffect( () => {     
+        console.log(user) 
+        if( user && user.rol_id == 3)  {            
+            getCheckList();
+            load(proy_id);
+        }
+        else{
+            Notificacion('Debe tener Rol de QA Tester','warning');
+        }
+        console.log(revision)
     },[])
 
     async function load(proyId) {
@@ -169,7 +202,7 @@ const Revision = ({frontend,backend}) => {
 
                 const rev = await getRevision( proyId, proy_etapa.Etapa_Id)
                 // console.log("revision: ", rev);            
-                await setRevision(rev)
+                 setRevision(rev)
                 
                 // console.log('revision',revision)
                 const detRev = await getDetalleRev(proyId, proy_etapa.Etapa_Id,rev.Revision_Id)
@@ -218,7 +251,7 @@ const Revision = ({frontend,backend}) => {
             
             if( data.affectedRows === 1 ) {
                 //console.log('Etapa: API Success',data);              
-                // Notificacion("Se creo la siguiente etapa.",'success');
+                console.log("Se creo la siguiente etapa.",'success');
                 return data //"OK";
             } else {
                 console.error("addNewEtapa MySQL ",data);
@@ -381,48 +414,58 @@ const Revision = ({frontend,backend}) => {
         e.preventDefault();       
     }
 
-    const onSave = async(proyId) => {        
-        if(proyId > 0) {
-            setDetalleError(true)
+    const onSave = async(proyId) => {
 
-            const res = await detalleRevision.map((det=>(
-                addUpdateDetalleRevision(det) 
-           )))   
-               
-           if( detalleError ) {
-            Notificacion('Valide la revisión...','warning') 
-           } 
-           else 
-           {
-                const marcados = detalleRevision.filter(item => item.Marcado === 1 || item.Marcado==true);       
-                
-                if( marcados.length >= checkList.length) { // siguiente etapa 
+        if(proyId > 0) {
+            
+            const marcados = detalleRevision.filter(item => item.Marcado === 1 || item.Marcado==true);       
+            if( marcados.length > 0 ) {
+                await setDetalleError(true) // setting at addUpdateDetalleRevision
+
+                const res = await detalleRevision.map( (det=>( // guardar checkList y fecha
+                    addUpdateDetalleRevision(det) 
+                )))                
+            
+                if( marcados.length >= checkList.length) { // siguiente etapa , pueden haber etapas Inactivas
+
                     if( etapa.Etapa_Id < 4 ) { // Produccion 
                         patchProyEtapa(proyecto.Proyecto_Id,"Revisión Satifactoria", proy_etapa.Etapa_Id)
                         addNewEtapa()
                         updateDashboard(2,1) // revision
-                        patchProyecto(proyecto.Proyecto_Id, 'Revisión de QA en Proceso')
-                        Notificacion('Etapa completada satisfactoriamente.','success')
-                        //navigate('/proyecto')
+                        patchProyecto(proyecto.Proyecto_Id, 'Revisión en Proceso')
+                        Mensaje('Etapa completada satisfactoriamente.','success',()=>{
+                            Notificacion("Se creó la siguiente etapa.",'success')
+                            //navigate('/proyecto/'+proyecto.Proyecto_Id)
+                            navigate('/gestion')
+                        })                        
                     }
-                    else {
+                    else { // siguiente etapa
                         patchProyEtapa(proyecto.Proyecto_Id,"Revisión Satifactoria", proy_etapa.Etapa_Id)
                         await updateDashboard(4,1) // aprobado
                         patchProyecto(proyecto.Proyecto_Id, 'QA Satisfactorio')
-                        Notificacion('Gestión completada satisfactoriamente.','success')
-                        // navigate('/gestion')
+                        Mensaje('Gestión completada satisfactoriamente.','success',()=>{
+                            Notificacion("Se Finalizo la Gestión satisfactoriamente.",'success')
+                            navigate('/gestion')
+                        })
                     }
                 }
-                else if(marcados.length > 0) {
-                    Notificacion('Revisión guardada correctamente.','success')
+                else if(marcados.length > 0) {                    
                     updateDashboard(2,1) // revision
-                    patchProyecto(proyecto.Proyecto_Id, 'Revisión de QA en Proceso')
+                    patchProyecto(proyecto.Proyecto_Id, 'Revisión en Proceso')
                     patchProyEtapa(proyecto.Proyecto_Id, 'En Revisión',proy_etapa.Etapa_Id)
-                }
-           }
+                    load(proyId)
+                    //Mensaje('Revisión guardada correctamente.','success',()=>{Notificacion('Revisión guardada!')})
+                    Notificacion('Revisión guardada correctamente.','success')
+                }               
+            }
+            else {                
+                patchProyecto(proyecto.Proyecto_Id, 'Revisión en Proceso')
+                patchProyEtapa(proyecto.Proyecto_Id, 'En Revisión',proy_etapa.Etapa_Id)
+                Mensaje('Debe marcar al menos una prueba.','warning')
+            }
         }
         else{
-            Notificacion("Debe ingresar un proyecto",'error')        
+            Notificacion("Debe ingresar un proyecto",'warning')
         }    
         
     }
@@ -482,7 +525,7 @@ const Revision = ({frontend,backend}) => {
     const onChangeDate = (e) => {
         setSelectedDate(e.target.value);
         
-        console.log("onChangeDate: ",e.target.value)
+        // console.log("onChangeDate: ",e.target.value)
 
         const result = detalleRevision.filter((det) => (
             det.Check_List_Id == item.Check_List_Id 
@@ -509,40 +552,11 @@ const Revision = ({frontend,backend}) => {
                 det.Check_List_Id === item.Check_List_Id
                 ? {...det,Fecha:moment(e.target.value).format('YYYY-MM-DD')} : det
             )));
-
         }  
     }
 
     const onClickDate = (item) => {
         setItem(item)
-        console.log("onClickDate: ",item)
-
-        // const result = detalleRevision.filter((det) => (
-        //     det.Check_List_Id == item.Check_List_Id 
-        // ));        
-
-        // if( result.length==0 ) { //  insert
-            
-        //     // console.log('insert')
-        //     setDetalleRevision( 
-        //         [...detalleRevision,{
-        //             Proyecto_Id:proyecto.Proyecto_Id,
-        //             Etapa_Id:etapa.Etapa_Id,
-        //             Revision_Id: revision.Revision_Id,
-        //             Check_List_Id: item.Check_List_Id,
-        //             Marcado: 0, 
-        //             Fecha: moment(selectedDate).format('YYYY-MM-DD')
-        //         }]
-        //     );
-        // }
-        // else {            
-        //     // console.log('update')
-        //     console.log('result',result[0].Fecha)
-        //     setDetalleRevision( detalleRevision.map( (det) => (
-        //         det.Check_List_Id === item.Check_List_Id
-        //         ? {...det,Fecha:moment(selectedDate).format('YYYY-MM-DD')} : det
-        //     )));
-        // }          
     }
     const getDate = (item) => {
 
@@ -551,10 +565,7 @@ const Revision = ({frontend,backend}) => {
             det.Check_List_Id == item.Check_List_Id 
         ))
 
-        if( res.length > 0 ) {            
-            // console.log('item.Check_List_Id',item.Check_List_Id)
-            // console.log('date: ',res)
-            // console.log('getDate: ',res[0])
+        if( res.length > 0 ) {
             // console.log('getDate: ',res[0].Fecha)
             return moment(res[0].Fecha).format('YYYY-MM-DD')  || selectedDate;
         }
@@ -563,25 +574,41 @@ const Revision = ({frontend,backend}) => {
     }
 
     const onDevolver = async() => {
+        Mensaje("¿Desea Devolver el proyecto?",'warning',devolver)         
+    }
+    const devolver = async () => {        
         // cambiar estado
         updateDashboard(3,1) // correccion
         patchProyecto(proyecto.Proyecto_Id, 'Pendiente de Corrección') 
         patchProyEtapa(proyecto.Proyecto_Id, 'Pendiente de Corrección',proy_etapa.Etapa_Id)
-        insertRevision()
-        load(proyecto.Proyecto_Id)
-        Notificacion("El desarrollo fue devuelto para correcciones.",'success')
+        insertRevision() // nueva revision
+        await load(proyecto.Proyecto_Id)
+        Notificacion("El desarrollo fue devuelto para correcciones.",'success') 
+        navigate('/gestion')
+        //navigate('/proyecto/'+proyecto.Proyecto_Id)
+               
     }
+
     const onRechazado = () => {
+        Mensaje("¿Desea Rechazar el proyecto?",'warning',rechazar)               
+    }
+    const rechazar = () => {
         // cambiar estado
         updateDashboard(5,1) // correccion
         patchProyecto(proyecto.Proyecto_Id, 'Desarrollo Rechazado')
         patchProyEtapa(proyecto.Proyecto_Id, 'Desarrollo Rechazado',proy_etapa.Etapa_Id)
-        Notificacion("El desarrollo fue rechazado.",'success')
         load(proyId)
+        Notificacion("El desarrollo fue rechazado.",'success',()=>{navigate('/gestion')})
+        navigate('/gestion')
     }
+
     const onDescartar = () => {
         // cambiar estado
-        updateDashboard(6,1) // correccion
+        updateDashboard(6,1) // descartado
+        patchProyecto(proyecto.Proyecto_Id, 'Desarrollo Descartado')
+        patchProyEtapa(proyecto.Proyecto_Id, 'Desarrollo Descartado',proy_etapa.Etapa_Id)
+        Notificacion("El desarrollo fue descartado.",'success')
+        load(proyId)
     }
 
     const onChangeProyId = async (e) => { 
@@ -591,6 +618,7 @@ const Revision = ({frontend,backend}) => {
     const onClickBuscar = async(proyId) => {
         console.log('proyId: ',proyId); 
         setProyId(proyId)
+        navigate('/revision/'+proyId)
         load(proyId)
     }
 
@@ -643,8 +671,8 @@ const Revision = ({frontend,backend}) => {
                     <label className="control-label">Estado</label>
                     <input value={proy_etapa.Estado || ''} type="text" name="estado" className="form-control" readOnly="readonly" />
                 </div>
-
-                {/* <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+{/* 
+                <div className="col-lg-3 col-md-4 col-sm-6 col-xs-12">
                     <label className="control-label">Cantidad de Defectos</label>
                     <input value={revision.Cantidad_Defectos || ''} onChange={onChangeCheck} name="defectos" type="text" className="form-control" />
                 </div>
@@ -663,8 +691,8 @@ const Revision = ({frontend,backend}) => {
                     <thead>
                         <tr>
                             <th>Pruebas</th>
-                            <th style={{width:210+'px'}}>Estado</th>
-                            <th>Fecha de Revisión</th>
+                            <th style={{width:270+'px'}}>Estado</th>
+                            <th style={{width:170+'px'}}>Fecha de Revisión</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -685,7 +713,7 @@ const Revision = ({frontend,backend}) => {
                 
             </div>    
 
-            <div className="row mt-3">
+            <div className="row mt-3" style={{display: user.rol_id == 3 ? 'flex':'none' }}>
                 <div className="col-md-12 contenedor">
                     <button onClick={()=>{onSave(proyecto.Proyecto_Id)}} type="button" className="btn btn-success" style={{width:150 +'px'}}>Guardar</button>
 
