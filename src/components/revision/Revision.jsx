@@ -7,6 +7,11 @@ import withReactContent from 'sweetalert2-react-content'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../AuthContext";
 
+const ESTADO_REV_OK = "QA Satisfactorio"
+const ESTADO_EN_REV = 'En Revisión'
+const ESTADO_PEND = 'Pendiente de Corrección'
+const ESTADO_RECHA = 'Desarrollo Rechazado'
+
 const Revision = ({frontend,backend}) => { 
     const { user } = useAuth();
     const { proy_id } = useParams(); // /revision/:proy_id
@@ -23,6 +28,7 @@ const Revision = ({frontend,backend}) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [detalleError, setDetalleError] = useState(false)
     const [item,setItem] = useState(0)
+    const [visible , setVisible ] = useState(1)
 
     const MySwal = withReactContent(Swal);
     const Notificacion = async (msg, icono='success') => {
@@ -185,6 +191,16 @@ const Revision = ({frontend,backend}) => {
         if( proyId > 0 ) {
             await setProyId(proyId) 
             const proy = await getProyecto(proyId);
+            
+            if( proy && proy.Estado == ESTADO_REV_OK) {
+                Notificacion(ESTADO_REV_OK)
+                setVisible(0)
+            }
+            if( proy && proy.Estado == ESTADO_RECHA) {
+                Notificacion(ESTADO_RECHA)
+                setVisible(0)
+            }
+
             if( proy ) {
                 setProyecto(proy)          
                 // console.log("proy: ", proy.Nombre);
@@ -429,7 +445,7 @@ const Revision = ({frontend,backend}) => {
                 if( marcados.length >= checkList.length) { // siguiente etapa , pueden haber etapas Inactivas
 
                     if( etapa.Etapa_Id < 4 ) { // Produccion 
-                        patchProyEtapa(proyecto.Proyecto_Id,"Revisión Satifactoria", proy_etapa.Etapa_Id)
+                        patchProyEtapa(proyecto.Proyecto_Id,ESTADO_REV_OK, proy_etapa.Etapa_Id)
                         addNewEtapa()
                         updateDashboard(2,1) // revision
                         patchProyecto(proyecto.Proyecto_Id, 'Revisión en Proceso')
@@ -440,7 +456,7 @@ const Revision = ({frontend,backend}) => {
                         })                        
                     }
                     else { // siguiente etapa
-                        patchProyEtapa(proyecto.Proyecto_Id,"Revisión Satifactoria", proy_etapa.Etapa_Id)
+                        patchProyEtapa(proyecto.Proyecto_Id,ESTADO_REV_OK, proy_etapa.Etapa_Id)
                         await updateDashboard(4,1) // aprobado
                         patchProyecto(proyecto.Proyecto_Id, 'QA Satisfactorio')
                         Mensaje('Gestión completada satisfactoriamente.','success',()=>{
@@ -452,7 +468,7 @@ const Revision = ({frontend,backend}) => {
                 else if(marcados.length > 0) {                    
                     updateDashboard(2,1) // revision
                     patchProyecto(proyecto.Proyecto_Id, 'Revisión en Proceso')
-                    patchProyEtapa(proyecto.Proyecto_Id, 'En Revisión',proy_etapa.Etapa_Id)
+                    patchProyEtapa(proyecto.Proyecto_Id, ESTADO_EN_REV,proy_etapa.Etapa_Id)
                     load(proyId)
                     //Mensaje('Revisión guardada correctamente.','success',()=>{Notificacion('Revisión guardada!')})
                     Notificacion('Revisión guardada correctamente.','success')
@@ -460,7 +476,7 @@ const Revision = ({frontend,backend}) => {
             }
             else {                
                 patchProyecto(proyecto.Proyecto_Id, 'Revisión en Proceso')
-                patchProyEtapa(proyecto.Proyecto_Id, 'En Revisión',proy_etapa.Etapa_Id)
+                patchProyEtapa(proyecto.Proyecto_Id, ESTADO_EN_REV,proy_etapa.Etapa_Id)
                 Mensaje('Debe marcar al menos una prueba.','warning')
             }
         }
@@ -579,8 +595,8 @@ const Revision = ({frontend,backend}) => {
     const devolver = async () => {        
         // cambiar estado
         updateDashboard(3,1) // correccion
-        patchProyecto(proyecto.Proyecto_Id, 'Pendiente de Corrección') 
-        patchProyEtapa(proyecto.Proyecto_Id, 'Pendiente de Corrección',proy_etapa.Etapa_Id)
+        patchProyecto(proyecto.Proyecto_Id, ESTADO_PEND) 
+        patchProyEtapa(proyecto.Proyecto_Id, ESTADO_PEND,proy_etapa.Etapa_Id)
         insertRevision() // nueva revision
         await load(proyecto.Proyecto_Id)
         Notificacion("El desarrollo fue devuelto para correcciones.",'success') 
@@ -595,20 +611,11 @@ const Revision = ({frontend,backend}) => {
     const rechazar = () => {
         // cambiar estado
         updateDashboard(5,1) // correccion
-        patchProyecto(proyecto.Proyecto_Id, 'Desarrollo Rechazado')
-        patchProyEtapa(proyecto.Proyecto_Id, 'Desarrollo Rechazado',proy_etapa.Etapa_Id)
+        patchProyecto(proyecto.Proyecto_Id, ESTADO_RECHA)
+        patchProyEtapa(proyecto.Proyecto_Id, ESTADO_RECHA ,proy_etapa.Etapa_Id)
         load(proyId)
         Notificacion("El desarrollo fue rechazado.",'success',()=>{navigate('/gestion')})
         navigate('/gestion')
-    }
-
-    const onDescartar = () => {
-        // cambiar estado
-        updateDashboard(6,1) // descartado
-        patchProyecto(proyecto.Proyecto_Id, 'Desarrollo Descartado')
-        patchProyEtapa(proyecto.Proyecto_Id, 'Desarrollo Descartado',proy_etapa.Etapa_Id)
-        Notificacion("El desarrollo fue descartado.",'success')
-        load(proyId)
     }
 
     const onChangeProyId = async (e) => { 
@@ -619,6 +626,7 @@ const Revision = ({frontend,backend}) => {
         console.log('proyId: ',proyId); 
         setProyId(proyId)
         navigate('/revision/'+proyId)
+        
         load(proyId)
     }
 
@@ -640,7 +648,7 @@ const Revision = ({frontend,backend}) => {
         </div>
         <hr></hr>
 
-        <div style={{display:revision?'block':'none'}}>                    
+        <div style={{display:revision && visible===1 ?'block':'none'}}>                    
 
             <div className="row form-group" >
 
