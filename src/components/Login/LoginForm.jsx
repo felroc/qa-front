@@ -22,9 +22,10 @@ const LoginForm = ({frontend,backend}) => {
     }
     
     const [username, setUserName] = useState('');
-    const [pwd, setPwd] = useState('');
-        
+    const [pwd, setPwd] = useState('');    
+
     useEffect(() => {        
+        
         const data = localStorage.getItem('user');
         // console.log('LoginForm: ',data)
 

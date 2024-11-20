@@ -290,7 +290,7 @@ const GestionForm = ({fronted,backend})=> {
         // DTO : Data Transfer Object ( Sirve para transferencia entre el Frontend y Backend) 
         const datos = {           
             id      ,  
-            etapaId,
+            etapaId : proy_etapa.Etapa_Id,
             estado: 'En Proceso',
             dev,
             tester,
@@ -308,7 +308,7 @@ const GestionForm = ({fronted,backend})=> {
                 
         console.log('addUpdateEtapa',datos);
         
-        await fetch(backend+'/api/qa/etapa', {
+        await fetch(backend+'/api/qa/proy_etapa', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -614,8 +614,13 @@ const GestionForm = ({fronted,backend})=> {
     // VISTA HTML
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
-        <div>
-        <form onSubmit={handlerSubmit} className="mb-3">  
+        <div >
+        <div style={{display: user.rol_id == 3 ? 'block' : 'none'}}>
+            <h1>ACCESSO RESTRINGIDO</h1>
+            <hr></hr>
+            <p>No tiene accesso a este contenido.</p>
+        </div>
+        <form onSubmit={handlerSubmit} className="mb-3" style={{display: user.rol_id == 3 ? 'none': 'flex' }}>  
             
             <div className="row mt-3">
                 <div className="col-md-8">

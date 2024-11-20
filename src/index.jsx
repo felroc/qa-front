@@ -33,7 +33,7 @@ root.render(
     {/* <React.StrictMode > */}      
       <div className='container my-3'>
         <AuthProvider>
-          <NavBar ></NavBar>
+          <NavBar backend={backend} ></NavBar>
           <Routes>
             
             <Route path='/' element={<Welcome></Welcome>}></Route>

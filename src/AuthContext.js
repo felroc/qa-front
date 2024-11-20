@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const data = localStorage.getItem('user');    
     if( data ) {
-      // console.log('AUTH: ',JSON.parse(data).username)
+      // console.log('AUTH: ',JSON.parse(data))
       // setIsAuthenticated(true)
       setUser(JSON.parse(data)) // Sirve para manter el usuario y mostrar el username en el navbar
     }
@@ -50,10 +50,10 @@ export const AuthProvider = ({ children }) => {
     //  console.log('data:', data.username, data.fullname, data.rol_id)    
     
     //localStorage.setItem('user', data); se debe guardar el objeto como JSON
-    localStorage.setItem('user', JSON.stringify(data)); // se debe guardar el objeto como JSON
+    await localStorage.setItem('user', JSON.stringify(data)); // se debe guardar el objeto como JSON
     
-    await setUser(data);    
-    console.log('user:',user )
+    await setUser(data);
+    // console.log('user:',user )
     
     //navigate("/"); // Redirige a la página protegida después de iniciar sesión
   };

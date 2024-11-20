@@ -134,7 +134,7 @@ const Revision = ({frontend,backend}) => {
         // console.log('rev fecha',datos.Fecha);
         // Insert o Update if already exists
         await fetch(backend+'/api/qa/detalle_revision', {
-            method: 'POST',
+            method: 'POST', 
             headers: {
               'Content-Type': 'application/json',
             },

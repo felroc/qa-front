@@ -38,8 +38,7 @@ const Dashboard = ({frontend,backend}) => {
 
     // Evento Page Load
     useEffect( () => {
-        const data = getDashboard();        
-       
+        const data = getDashboard();               
     },[])
 
     return (

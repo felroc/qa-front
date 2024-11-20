@@ -10,6 +10,7 @@ const GestionList = ({backend}) => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [proys, setProys] = useState([]);
+    const [etapas, setEtapas] = useState([]) 
 
     const Notificacion = (msg, icono="success") => {
         Swal.fire({
@@ -29,8 +30,18 @@ const GestionList = ({backend}) => {
         setProys(data);
     }
 
+    const getEtapas = async (proyId) => {
+        const response = await fetch(backend+"/api/qa/etapas/");
+        //console.log(response);
+        const data = await response.json();
+        console.log('Etapas: ',data);
+        await setEtapas(data); // all        
+        return data; // all
+    }
+
     // Evento Load
     useEffect(()=>{
+        getEtapas()
         getProys(); 
     },[])
 
@@ -97,30 +108,31 @@ const GestionList = ({backend}) => {
         <div>            
 
             <div className="row mt-3">
-                <div className="col-md-10">
+                <div className="col-md-8">
                     <h1>Gestión de proyectos</h1>                
                 </div>
-                <div className="col-md-2 mt-2">
-                    <button onClick={()=>{navigate('/proyecto')}} type="button" className="btn btn-success">Crear Proyecto</button>
+                <div className="col-md-3 mt-2" style={{textAlign:"right"}}>
+                    <button onClick={()=>{navigate('/proyecto')}} type="button" style={{float:"right"}} className="btn btn-success">Crear Proyecto</button>
                 </div>
             </div>
             
             <hr></hr>        
 
             <div className="table-responsive mt-3">
-                <table border="1" cellPadding="10" cellSpacing="0" 
-                className="table1 table-striped table-borderedx table-hover table-dark1">
+                <table className="table table-striped table-borderedx table-hover table-dark1">
                     <thead>
                         <tr>                                                  
                             <th>Proyecto Id</th>
                             <th>Nombre proyecto</th>
                             <th>Producto Owner</th>
                             <th>Estado</th>
+                            <th>Etapa</th>
+                            <th>Revisión</th>
                             <th>Fecha Creación</th>
                             {/* {headers.map((header, index)=>(
                                 <th style={headerStyle} key={index}>{header}</th>
                             ))} */}
-                            <th colSpan={2}></th>
+                            <th colSpan={3}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -130,7 +142,8 @@ const GestionList = ({backend}) => {
                                 <td>{proy.Nombre}</td>
                                 <td>{proy.User_Create}</td>
                                 <td>{proy.Estado}</td>
-                                {/* vista con Etapa y Revision */}
+                                <td>{etapas.filter(e=>e.Etapa_Id===proy.Etapa_Id)[0].Etapa}</td>
+                                <td>{proy.Revision_Id}</td>                                
                                 <td>{moment(proy.Created).format('DD MMMM YYYY')}</td>
                                 <td><button onClick={()=>{onView(proy.Proyecto_Id)}}  className="btn btn-primary">Abrir</button></td>
                                 <td><button onClick={()=>{onRevision(proy.Proyecto_Id)}} className="btn btn-warning">Revision</button></td>

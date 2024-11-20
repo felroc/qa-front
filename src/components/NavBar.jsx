@@ -1,20 +1,46 @@
 import "./NavBar.css"
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { Navbar, Nav, Container, NavDropdown, Button } from "react-bootstrap";
 import {NavLink, LinkContainer , Link} from "react-router-dom";
 
-const NavBar = () => {
+const NavBar = ( {backend}) => {
     const {isAuthenticated, user} = useAuth();    
-    const roles = [{rol_id:1,rol:'PO'},{rol_id:1,rol:'DEV'},{rol_id:1,rol:'QA'}]
+    const [roles, setRoles] = useState([])
+    const [rol,setRol] = useState('')
+    
+    const getRoles = async () => {
+        const response = await fetch(backend+"/api/qa/roles");
+        //console.log(response);
+        const data = await response.json();
+        //console.log("getRoles:",data)
+        await setRoles(data)           
+        return data
+    }
+
+    const load = async (rol_id) => {
+      const res = await getRoles()
+      // console.log("roles:",res)
+      // console.log("user.rol_id:",rol_id)
+      
+      const name = await res.filter( rol=> rol.Rol_Id === rol_id )[0].Rol_name
+      // console.log("name:",name)
+
+       setRol( name )
+      
+      await setRoles(res)
+    }
 
     useEffect(() => {
       const data = localStorage.getItem('user');
       if (data) {
-        //console.log('Navbar: ',data)
+        const obj = JSON.parse(data)
+        // console.log('Navbar: ',obj)
+        load(obj.rol_id) // necesario para cargar roles
       }
-    }, []);
+      
+    }, [user]);
 
     return(
         <Navbar bg="primary" variant="dark1" expand="lg">
@@ -46,8 +72,10 @@ const NavBar = () => {
             {isAuthenticated ? (
             <Nav className="ms-auto">
               
-              <Navbar.Text className="ms-auto" style={{marginLeft:"250px"}}>Usuario: {user.fullname} </Navbar.Text> 
-              {/* Rol: {roles[user.rol_id-1].rol}  */}
+              <Navbar.Text className="ms-auto" style={{marginLeft:"250px"}}>
+                {user.fullname} &nbsp; / &nbsp; {rol} 
+              </Navbar.Text> 
+             
               <Nav.Link as={NavLink} style={{marginLeft:"100px"}} className="me-auto" to="/logout">Logout</Nav.Link>                  
             </Nav>) : (<></>)
             }

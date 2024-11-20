@@ -3,6 +3,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const BarChart = ({labels,datos}) => {
+  
   const data = {
     labels: labels,// ["En proceso", "Completados", "Rechazados", "Descartados"],
     datasets: [
@@ -52,6 +53,7 @@ const BarChart = ({labels,datos}) => {
     <div style={{ width: "800px",height:"450px", margin: "50px" }}>
 
       <Bar data={data} options={options} />
+
       <br></br>
       <p>Indicador cuantitatvo de los desarrollo de software en cada estado</p>
     </div>    
